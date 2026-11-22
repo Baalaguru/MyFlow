@@ -8,20 +8,22 @@ export interface TaskSeriesPoint {
 
 function inLocalPeriod(date: Date, now: Date, days: number): boolean {
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1)
-  return date >= start && date <= now
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+  return date >= start && date < end
 }
 
+/** Half-open buckets: local midnight belongs to the following day, never to both. */
 function capturedIn(tasks: TaskRecord[], start: Date, end: Date): TaskRecord[] {
   return tasks.filter((task) => {
     const created = new Date(task.createdAt)
-    return !Number.isNaN(created.getTime()) && created >= start && created <= end
+    return !Number.isNaN(created.getTime()) && created >= start && created < end
   })
 }
 
 function completedWithin(task: TaskRecord, start: Date, end: Date): boolean {
   if (!task.completed || !task.completedAt) return false
   const instant = new Date(task.completedAt)
-  return !Number.isNaN(instant.getTime()) && instant >= start && instant <= end
+  return !Number.isNaN(instant.getTime()) && instant >= start && instant < end
 }
 
 /** Seven completed local days ending today. Counts are derived from real task records. */

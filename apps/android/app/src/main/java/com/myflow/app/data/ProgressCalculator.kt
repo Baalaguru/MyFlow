@@ -25,6 +25,5 @@ fun calculateProgress(completed: Int, total: Int): ProgressSnapshot {
     )
 }
 
-/** To-Do progress comes from real local task records only. */
-fun progressForTasks(tasks: List<TaskEntity>): ProgressSnapshot =
-    calculateProgress(tasks.count { it.completed }, tasks.size)
+/** To-Do progress uses scheduled local tasks only; unscheduled notes are excluded. */
+fun progressForTasks(tasks: List<TaskEntity>): ProgressSnapshot = scheduledProgress(tasks)

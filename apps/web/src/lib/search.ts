@@ -9,7 +9,10 @@ export interface SearchResult {
 }
 
 export function taskMatches(task: TaskRecord, query: string): boolean {
-  return task.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+  const normalised = query.trim().toLocaleLowerCase()
+  if (!normalised) return false
+  const haystack = `${task.title} ${task.description ?? ''} ${task.category ?? ''}`.toLocaleLowerCase()
+  return haystack.includes(normalised)
 }
 
 export function taskToResult(task: TaskRecord): SearchResult {
@@ -21,7 +24,7 @@ export function taskToResult(task: TaskRecord): SearchResult {
   }
 }
 
-/** Local read-only projection. Phase 4 has a task provider only; other modules are absent. */
+/** Local read-only projection. Tasks remain the only indexed record type. */
 export async function searchLocalRecords(query: string, limit = 8): Promise<SearchResult[]> {
   const normalised = query.trim().toLocaleLowerCase()
   if (!normalised) return []

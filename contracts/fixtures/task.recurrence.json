@@ -1,0 +1,55 @@
+{
+  "rule": "task.next-occurrence",
+  "cases": [
+    {
+      "case": "weekly rule with a count produces one bounded successor",
+      "input": {
+        "now": "2026-11-22T12:00:00.000Z",
+        "task": {
+          "id": "root",
+          "title": "Water plants",
+          "completed": true,
+          "createdAt": "2026-11-22T08:00:00.000Z",
+          "dueDate": "2026-11-22",
+          "recurrence": { "frequency": "weekly", "interval": 1, "count": 2 }
+        },
+        "tasks": []
+      },
+      "expected": { "dueDate": "2026-11-29", "recurrenceParentId": "root", "completed": false }
+    },
+    {
+      "case": "a rule without further allowance produces no successor",
+      "input": {
+        "now": "2026-11-22T12:00:00.000Z",
+        "task": {
+          "id": "root",
+          "title": "Water plants",
+          "completed": true,
+          "createdAt": "2026-11-22T08:00:00.000Z",
+          "dueDate": "2026-11-22",
+          "recurrence": { "frequency": "weekly", "interval": 1, "count": 2 }
+        },
+        "tasks": [
+          { "id": "child", "title": "Water plants", "completed": false, "createdAt": "2026-11-22T09:00:00.000Z", "dueDate": "2026-11-29", "recurrenceParentId": "root" }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "case": "an end date stops recurrence at the boundary",
+      "input": {
+        "now": "2026-11-22T12:00:00.000Z",
+        "task": {
+          "id": "root",
+          "title": "Review",
+          "completed": true,
+          "createdAt": "2026-11-22T08:00:00.000Z",
+          "dueDate": "2026-11-22",
+          "recurrence": { "frequency": "daily", "interval": 1, "until": "2026-11-23" }
+        },
+        "tasks": []
+      },
+      "expected": { "dueDate": "2026-11-23", "recurrenceParentId": "root", "completed": false }
+    }
+  ]
+}

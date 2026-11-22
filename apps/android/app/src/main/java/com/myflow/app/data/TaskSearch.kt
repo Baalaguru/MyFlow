@@ -8,7 +8,7 @@ data class SearchResult(
     val completed: Boolean,
 )
 
-/** Pure title-only matcher; whitespace is ignored and matching is case-insensitive. */
+/** Pure local matcher over title, description, and category; whitespace is ignored. */
 fun projectTaskSearch(
     tasks: List<TaskEntity>,
     query: String,
@@ -17,7 +17,7 @@ fun projectTaskSearch(
     val normalised = query.trim().lowercase()
     if (normalised.isBlank()) return emptyList()
     return tasks
-        .filter { it.title.lowercase().contains(normalised) }
+        .filter { "${it.title} ${it.description} ${it.category}".lowercase().contains(normalised) }
         .take(limit)
         .map { task ->
             SearchResult(

@@ -74,7 +74,14 @@ export default function App() {
       )
     }
     if (route === 'tasks') {
-      return <TasksWorkspace t={t} revision={captureRevision} onSaved={() => setCaptureRevision((value) => value + 1)} />
+      return (
+        <TasksWorkspace
+          t={t}
+          appearance={appearance}
+          revision={captureRevision}
+          onSaved={() => setCaptureRevision((value) => value + 1)}
+        />
+      )
     }
     if (isEmptyModuleRoute(route)) return <EmptyModuleWorkspace route={route} t={t} />
     if (route === 'profile') return <ProfilePage t={t} onNavigate={navigate} />

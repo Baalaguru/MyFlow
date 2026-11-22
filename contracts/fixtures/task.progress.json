@@ -1,0 +1,37 @@
+{
+  "rule": "task.scheduled-progress",
+  "cases": [
+    {
+      "case": "unscheduled notes are excluded from the denominator",
+      "input": {
+        "now": "2026-11-22T12:00:00.000Z",
+        "tasks": [
+          { "id": "scheduled-done", "title": "Done", "completed": true, "dueDate": "2026-11-22", "createdAt": "2026-11-22T08:00:00.000Z" },
+          { "id": "scheduled-open", "title": "Open", "completed": false, "dueDate": "2026-11-22", "createdAt": "2026-11-22T08:00:00.000Z" },
+          { "id": "note", "title": "Unscheduled", "completed": true, "createdAt": "2026-11-22T08:00:00.000Z" }
+        ]
+      },
+      "expected": { "completed": 1, "total": 2, "percent": 50, "available": true }
+    },
+    {
+      "case": "no scheduled task means progress is unavailable",
+      "input": {
+        "now": "2026-11-22T12:00:00.000Z",
+        "tasks": [
+          { "id": "note", "title": "Unscheduled", "completed": true, "createdAt": "2026-11-22T08:00:00.000Z" }
+        ]
+      },
+      "expected": { "completed": 0, "total": 0, "percent": null, "available": false }
+    },
+    {
+      "case": "local midnight belongs only to the following day",
+      "input": {
+        "now": "2026-11-23T12:00:00.000Z",
+        "tasks": [
+          { "id": "midnight", "title": "Midnight", "completed": true, "completedAt": "2026-11-23T00:00:00.000Z", "createdAt": "2026-11-23T00:00:00.000Z" }
+        ]
+      },
+      "expected": { "label": "23", "captured": 1, "completed": 1 }
+    }
+  ]
+}

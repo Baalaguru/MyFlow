@@ -5,7 +5,7 @@ import type { Appearance } from '../../lib/appearance'
 import { resolveColorMode } from '../../lib/appearance'
 import { monthlyTaskSeries, weeklyTaskSeries, hasSeriesData } from '../../lib/analytics'
 import type { TaskRecord, WidgetConfig } from '../../lib/db'
-import { calculateProgress } from '../../lib/progress'
+import { scheduledProgress } from '../../lib/tasks'
 import { widgetRegistry } from '../../lib/widgets'
 import { QuickCapture } from '../QuickCapture'
 
@@ -27,17 +27,18 @@ function placeholder(widget: WidgetConfig, t: Translate) {
 
 export function WidgetBody({ widget, t, tasks, appearance, onToggleTask, onSaved }: WidgetBodyProps) {
   const open = tasks.filter((task) => !task.completed)
-  const done = tasks.filter((task) => task.completed)
-  const progress = calculateProgress(done.length, tasks.length)
+  const progress = scheduledProgress(tasks)
   const palette = chartPalettes[appearance.preset as PresetId][resolveColorMode(appearance.mode)]
 
   if (widget.id === 'todoOverview') {
-    if (tasks.length === 0) return placeholder(widget, t)
+    if (!progress.available) {
+      return <EmptyState title={t(widgetRegistry[widget.id].nameKey)} body={t('progressUnavailable')} />
+    }
     return (
       <div className="space-y-3">
         <ProgressBar
           value={progress.percent ?? 0}
-          label={`${done.length} ${t('progressCompletedOf')} ${tasks.length}`}
+          label={`${progress.completed} ${t('progressCompletedOf')} ${progress.total}`}
         />
         <ul className="space-y-1">
           {open.slice(0, 3).map((task) => (

@@ -15,6 +15,12 @@ describe('local search projection', () => {
     expect(taskMatches(task, 'missing')).toBe(false)
   })
 
+  it('also matches descriptions and categories', () => {
+    expect(taskMatches({ ...task, description: 'Balcony plant' }, 'balcony')).toBe(true)
+    expect(taskMatches({ ...task, category: 'Home' }, 'home')).toBe(true)
+    expect(taskMatches(task, '')).toBe(false)
+  })
+
   it('maps tasks to stable deep-link results without duplicating the record', () => {
     expect(taskToResult(task)).toEqual({
       id: 'task:task-1',

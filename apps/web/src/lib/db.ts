@@ -6,11 +6,39 @@ export interface SettingRecord {
   value: unknown
 }
 
-export interface TaskRecord {
+export type TaskPriority = 'veryHigh' | 'high' | 'medium' | 'low'
+export type TaskStatus = 'open' | 'completed'
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly'
+
+export interface SubtaskRecord {
   id: string
   title: string
   completed: boolean
+}
+
+export interface RecurrenceRule {
+  frequency: RecurrenceFrequency
+  interval: number
+  count?: number
+  until?: string
+}
+
+/** Optional fields keep Phase 4 rows readable without a data rewrite. */
+export interface TaskRecord {
+  id: string
+  title: string
+  description?: string
+  priority?: TaskPriority
+  category?: string
   dueDate?: string
+  startTime?: string
+  endTime?: string
+  status?: TaskStatus
+  completed: boolean
+  subtasks?: SubtaskRecord[]
+  recurrence?: RecurrenceRule
+  recurrenceParentId?: string
+  reminderOffsetMinutes?: number
   createdAt: string
   completedAt?: string
 }
@@ -47,6 +75,11 @@ class MyFlowDatabase extends Dexie {
     this.version(2).stores({
       settings: 'key',
       tasks: 'id, completed, dueDate',
+      dashboards: 'id, order, isDefault',
+    })
+    this.version(3).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
       dashboards: 'id, order, isDefault',
     })
   }

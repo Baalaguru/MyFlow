@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
@@ -29,12 +30,25 @@ interface SettingDao {
     suspend fun put(setting: SettingEntity)
 }
 
+/** Optional-by-example fields let Phase 3 rows survive the v4 migration unchanged. */
 @Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey val id: String,
     val title: String,
     val completed: Boolean,
     val createdAt: String,
+    val description: String = "",
+    val priority: String = TaskPriority.MEDIUM.key,
+    val category: String = "",
+    val dueDate: String = "",
+    val startTime: String = "",
+    val endTime: String = "",
+    val status: String = "open",
+    val completedAt: String? = null,
+    val subtasks: List<SubtaskRecord> = emptyList(),
+    val recurrence: RecurrenceRule? = null,
+    val recurrenceParentId: String? = null,
+    val reminderOffsetMinutes: Int? = null,
 )
 
 @Dao
@@ -45,8 +59,17 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY createdAt DESC")
     suspend fun all(): List<TaskEntity>
 
+    @Query("SELECT * FROM tasks WHERE id = :id")
+    suspend fun get(id: String): TaskEntity?
+
     @Insert
     suspend fun insert(task: TaskEntity)
+
+    @Upsert
+    suspend fun save(task: TaskEntity)
+
+    @Query("DELETE FROM tasks WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("UPDATE tasks SET completed = :completed WHERE id = :id")
     suspend fun setCompleted(id: String, completed: Boolean)
@@ -129,11 +152,35 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
+/** Adds task fields only. Settings, dashboards, and all existing rows are untouched. */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `description` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `priority` TEXT NOT NULL DEFAULT 'medium'")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `category` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `dueDate` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `startTime` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `endTime` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `status` TEXT NOT NULL DEFAULT 'open'")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `completedAt` TEXT")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `subtasks` TEXT NOT NULL DEFAULT '[]'")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `recurrence` TEXT")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `recurrenceParentId` TEXT")
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `reminderOffsetMinutes` INTEGER")
+        // Derived from the existing boolean; no completion instant is invented.
+        db.execSQL("UPDATE `tasks` SET `status` = 'completed' WHERE `completed` = 1")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_priority` ON `tasks` (`priority`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_category` ON `tasks` (`category`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_recurrenceParentId` ON `tasks` (`recurrenceParentId`)")
+    }
+}
+
 @Database(
     entities = [SettingEntity::class, TaskEntity::class, DashboardEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
+@TypeConverters(TaskJsonConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun settingDao(): SettingDao
     abstract fun taskDao(): TaskDao
@@ -150,7 +197,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "myflow.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build().also { instance = it }
             }
     }

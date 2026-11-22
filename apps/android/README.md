@@ -41,6 +41,14 @@ The Android client now has a real Compose navigation shell rather than a single 
 - The dashboard destination now has a selector, dashboard ordering and default controls, an add-widget picker, and widget sections. Weekly and monthly counts use real local task timestamps and show an explicit empty state when no records exist. Dashboard preference layout is stored on this device only; cross-device sync is deferred to the sync phase.
 - All new dashboard and widget strings are present in both English and Tamil resource files. All `R.string` references resolve in both locales.
 
+## Phase 6 status (static implementation)
+
+- Room was raised to database v4 with a non-destructive `MIGRATION_3_4` that only adds nullable/defaulted task columns and indexes. Existing `settings`, `dashboards`, and `tasks` rows are preserved; no destructive migration fallback is used. `status` is derived from the existing `completed` boolean, while `completedAt` stays null for legacy records rather than being invented.
+- `TaskEntity` now carries description, priority, category, due date, optional start/end times, subtasks, recurrence, reminder offset, completion instant, and recurrence parent. Subtasks and recurrence rules are stored as JSON through explicit Room converters.
+- `TaskRepository` supports create, edit, delete, complete/reopen, subtask toggling/removal, bounded append-only recurrence on completion, scheduled-only progress, and description/category search. `TaskRules.kt` mirrors the web pure projections for all eight task views, daily/weekly/monthly completion counts, priority distribution, overdue count, and next occurrence generation.
+- The Tasks workspace exposes all eight views, a resource-backed editor with priorities and recurrence, independent subtask controls, edit/reopen/delete actions, a month calendar of deadlines, and local analytics with honest empty states. Reminder offsets are saved locally and the UI states that notification delivery is not implemented.
+- All new task strings are present in both English and Tamil resource files; 251 `R.string` references resolve in both locales.
+
 ## Verification
 
 Runtime verification is **NOT APPLICABLE** in this environment: `ANDROID_HOME` is unset and no Android SDK, emulator, or device is available, so no Gradle build, instrumentation, or on-device check could be run. The implementation was reviewed statically for imports, resource parity between locales, migration SQL, and navigation/deep-link consistency. Run `./gradlew :app:assembleDebug` and exercise deep links, back navigation, task completion, search, both locales, and both themes once an SDK and device are available.
