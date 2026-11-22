@@ -1,0 +1,26 @@
+[
+  {
+    "rule": "workout.volume",
+    "case": "completed sets only",
+    "input": {
+      "sets": [
+        { "reps": 10, "weight": 40, "completed": true },
+        { "reps": 10, "weight": 45, "completed": true },
+        { "reps": 8, "weight": 55, "completed": false }
+      ]
+    },
+    "expected": 850
+  },
+  {
+    "rule": "workout.volume",
+    "case": "empty workout",
+    "input": { "sets": [] },
+    "expected": 0
+  },
+  {
+    "rule": "workout.volume",
+    "case": "bodyweight set has zero load",
+    "input": { "sets": [{ "reps": 20, "weight": 0, "completed": true }] },
+    "expected": 0
+  }
+]

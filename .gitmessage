@@ -1,0 +1,7 @@
+# <type>(<scope>): <short imperative summary>
+#
+# Types: feat fix docs refactor test chore build ci
+# Scopes: web android server contracts docs deploy
+#
+# Explain WHY in the body, not WHAT.
+# Reference ADRs or phase reports where relevant.

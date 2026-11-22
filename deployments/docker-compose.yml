@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-myflow}
+      POSTGRES_USER: ${POSTGRES_USER:-myflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-myflow} -d ${POSTGRES_DB:-myflow}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - myflow
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+
+  api:
+    build:
+      context: ..
+      dockerfile: deployments/Dockerfile.server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MYFLOW_ADDR: :8080
+      MYFLOW_ENV: ${MYFLOW_ENV:-production}
+      MYFLOW_LOG_LEVEL: ${MYFLOW_LOG_LEVEL:-info}
+      MYFLOW_MIGRATIONS_DIR: /app/migrations
+      DATABASE_URL: postgres://${POSTGRES_USER:-myflow}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-myflow}?sslmode=disable
+    volumes:
+      - backups:/app/backups
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '-', 'http://127.0.0.1:8080/healthz']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    networks:
+      - myflow
+    ports:
+      - '127.0.0.1:${API_PORT:-8080}:8080'
+
+volumes:
+  pgdata:
+  backups:
+
+networks:
+  myflow:
+    driver: bridge

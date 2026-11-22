@@ -1,0 +1,96 @@
+/* Self-hosted fonts: no CDN request on cold start, so the UI is fully offline-capable. */
+@import '@fontsource/cormorant-garamond/latin-400.css';
+@import '@fontsource/cormorant-garamond/latin-400-italic.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/libre-baskerville/latin-400.css';
+@import '@fontsource/libre-baskerville/latin-700.css';
+@import '@fontsource/nunito-sans/latin-400.css';
+@import '@fontsource/nunito-sans/latin-600.css';
+@import '@fontsource/nunito-sans/latin-700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f3ebdd;
+  --surface: #e4d7c1;
+  --accent: #70563b;
+  --growth: #788064;
+  --highlight: #a36f59;
+  --text: #3b332b;
+  --border: rgba(112, 86, 59, 0.28);
+  --muted: rgba(59, 51, 43, 0.64);
+}
+
+[data-theme='dark'] {
+  --bg: #241e1a;
+  --surface: #302821;
+  --accent: #a98a6b;
+  --growth: #98a282;
+  --highlight: #c08b72;
+  --text: #f0e4d0;
+  --border: rgba(240, 228, 208, 0.16);
+  --muted: rgba(240, 228, 208, 0.64);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    background-image: radial-gradient(rgba(112, 86, 59, 0.035) 1px, transparent 1px);
+    background-size: 18px 18px;
+    color: var(--text);
+    font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-weight: 400;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--highlight);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border shadow-paper;
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors;
+  }
+
+  .btn-primary {
+    background-color: var(--accent);
+    color: #fbf5e9;
+  }
+
+  .btn-ghost {
+    @apply border;
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .eyebrow {
+    @apply text-xs uppercase tracking-[0.18em];
+    color: var(--muted);
+  }
+}

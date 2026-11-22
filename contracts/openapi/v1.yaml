@@ -1,0 +1,157 @@
+openapi: 3.1.0
+info:
+  title: My Flow API
+  version: 0.1.0
+  description: Self-hosted, offline-first API for My Flow. Source of truth for generated client models.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+paths:
+  /healthz:
+    get:
+      operationId: getHealth
+      tags: [System]
+      summary: Liveness and dependency health
+      responses:
+        '200':
+          description: Current health
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /v1/health:
+    get:
+      operationId: getVersionedHealth
+      tags: [System]
+      summary: Versioned health check
+      responses:
+        '200':
+          description: Current health
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /v1/sync/push:
+    post:
+      operationId: pushSyncOperations
+      tags: [Sync]
+      summary: Push a batch of local operations
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+      responses:
+        '200':
+          description: Per-operation acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPushResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /v1/sync/pull:
+    get:
+      operationId: pullSyncChanges
+      tags: [Sync]
+      summary: Pull changes since a cursor
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        '200':
+          description: A page of changes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPullResponse'
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Health:
+      type: object
+      required: [status, environment, database, version, time]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        environment: { type: string }
+        database: { type: string, enum: [disabled, connected, unavailable] }
+        version: { type: string }
+        time: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status, code, detail, timestamp]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        code: { type: string }
+        trace_id: { type: string }
+        detail: { type: string }
+        timestamp: { type: string, format: date-time }
+    SyncOperation:
+      type: object
+      required: [idempotency_key, entity, entity_id, op, payload, hlc]
+      properties:
+        idempotency_key: { type: string, format: uuid }
+        entity: { type: string }
+        entity_id: { type: string, format: uuid }
+        op: { type: string, enum: [upsert, delete] }
+        payload: { type: object }
+        base_revision: { type: integer }
+        hlc: { type: string }
+    SyncPushRequest:
+      type: object
+      required: [device_id, operations]
+      properties:
+        device_id: { type: string, format: uuid }
+        operations:
+          type: array
+          items: { $ref: '#/components/schemas/SyncOperation' }
+    SyncPushResponse:
+      type: object
+      required: [acked_keys, rejected, server_hlc]
+      properties:
+        acked_keys:
+          type: array
+          items: { type: string, format: uuid }
+        rejected:
+          type: array
+          items:
+            type: object
+            properties:
+              idempotency_key: { type: string, format: uuid }
+              code: { type: string }
+        server_hlc: { type: string }
+    SyncPullResponse:
+      type: object
+      required: [changes, new_cursor, has_more]
+      properties:
+        changes:
+          type: array
+          items: { type: object }
+        new_cursor: { type: string }
+        has_more: { type: boolean }
+tags:
+  - name: System
+  - name: Sync
