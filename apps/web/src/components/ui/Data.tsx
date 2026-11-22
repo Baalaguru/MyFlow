@@ -82,15 +82,27 @@ export interface BarGraphProps {
   values: number[]
   colors: string[]
   description: string
+  axisColor?: string
+  gridColor?: string
 }
 
-export function BarGraph({ labels, values, colors, description }: BarGraphProps) {
+export function BarGraph({
+  labels,
+  values,
+  colors,
+  description,
+  axisColor = '#8A7A66',
+  gridColor = 'rgba(185, 167, 140, 0.35)',
+}: BarGraphProps) {
   const container = useRef<HTMLDivElement>(null)
-  const signature = JSON.stringify({ labels, values, colors })
+  const signature = JSON.stringify({ labels, values, colors, axisColor, gridColor })
 
   useEffect(() => {
     if (!container.current) return
-    const data = JSON.parse(signature) as Pick<BarGraphProps, 'labels' | 'values' | 'colors'>
+    const data = JSON.parse(signature) as Pick<
+      BarGraphProps,
+      'labels' | 'values' | 'colors' | 'axisColor' | 'gridColor'
+    >
     const chart = echarts.init(container.current, undefined, { renderer: 'canvas' })
     chart.setOption({
       animation: false,
@@ -98,13 +110,13 @@ export function BarGraph({ labels, values, colors, description }: BarGraphProps)
       xAxis: {
         type: 'category',
         data: data.labels,
-        axisLabel: { color: '#8A7A66', fontSize: 11 },
-        axisLine: { lineStyle: { color: '#B9A78C' } },
+        axisLabel: { color: data.axisColor, fontSize: 11 },
+        axisLine: { lineStyle: { color: data.axisColor } },
       },
       yAxis: {
         type: 'value',
-        axisLabel: { color: '#8A7A66', fontSize: 11 },
-        splitLine: { lineStyle: { color: 'rgba(185, 167, 140, 0.35)' } },
+        axisLabel: { color: data.axisColor, fontSize: 11 },
+        splitLine: { lineStyle: { color: data.gridColor } },
       },
       series: [
         {

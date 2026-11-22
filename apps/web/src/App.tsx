@@ -63,7 +63,16 @@ export default function App() {
   const resetAppearance = () => setAppearance({ ...DEFAULT_APPEARANCE, custom: {} })
 
   const page = () => {
-    if (route === 'dashboard') return <DashboardPage t={t} revision={captureRevision} />
+    if (route === 'dashboard') {
+      return (
+        <DashboardPage
+          t={t}
+          revision={captureRevision}
+          appearance={appearance}
+          onSaved={() => setCaptureRevision((value) => value + 1)}
+        />
+      )
+    }
     if (route === 'tasks') {
       return <TasksWorkspace t={t} revision={captureRevision} onSaved={() => setCaptureRevision((value) => value + 1)} />
     }

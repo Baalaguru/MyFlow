@@ -172,6 +172,35 @@
   }
 }
 
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.widget-card {
+  background-color: var(--mf-widget-background, var(--mf-widgetBackground));
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-lg, 12px);
+  box-shadow: var(--mf-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.widget-card[data-dragging='true'] {
+  opacity: 0.55;
+}
+
+.widget-card:focus-within {
+  outline: 2px solid var(--mf-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .widget-grid > * {
+    grid-column: 1 / -1 !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import type { WidgetId } from './widgets'
 
 export interface SettingRecord {
   key: string
@@ -11,17 +12,42 @@ export interface TaskRecord {
   completed: boolean
   dueDate?: string
   createdAt: string
+  completedAt?: string
+}
+
+export interface WidgetConfig {
+  id: WidgetId
+  columns: number
+  rows: number
+  visible: boolean
+  background: string
+  accent: string
+}
+
+export interface DashboardRecord {
+  id: string
+  name: string
+  order: number
+  isDefault: boolean
+  widgets: WidgetConfig[]
+  createdAt: string
 }
 
 class MyFlowDatabase extends Dexie {
   settings!: Table<SettingRecord, string>
   tasks!: Table<TaskRecord, string>
+  dashboards!: Table<DashboardRecord, string>
 
   constructor() {
     super('myflow')
     this.version(1).stores({
       settings: 'key',
       tasks: 'id, completed, dueDate',
+    })
+    this.version(2).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate',
+      dashboards: 'id, order, isDefault',
     })
   }
 }

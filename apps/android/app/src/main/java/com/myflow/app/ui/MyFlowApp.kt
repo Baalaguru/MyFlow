@@ -54,6 +54,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.myflow.app.R
 import com.myflow.app.data.AppDatabase
+import com.myflow.app.data.DashboardLabels
+import com.myflow.app.data.DashboardRepository
 import com.myflow.app.data.SearchResult
 import com.myflow.app.data.TaskRepository
 import com.myflow.app.ui.navigation.AppDestinations
@@ -90,6 +92,20 @@ fun MyFlowApp(startIntent: Intent? = null) {
     val context = LocalContext.current
     val repository = remember(context.applicationContext) {
         TaskRepository(AppDatabase.get(context.applicationContext).taskDao())
+    }
+    val defaultDashboardName = stringResource(R.string.default_dashboard_name)
+    val newDashboardName = stringResource(R.string.new_dashboard_name)
+    val dashboardCopyName = stringResource(R.string.dashboard_copy_name)
+    val dashboardRepository = remember(
+        context.applicationContext,
+        defaultDashboardName,
+        newDashboardName,
+        dashboardCopyName,
+    ) {
+        DashboardRepository(
+            AppDatabase.get(context.applicationContext).dashboardDao(),
+            DashboardLabels(defaultDashboardName, newDashboardName, dashboardCopyName),
+        )
     }
     val darkMode = isSystemInDarkTheme()
     val presetId = GeneratedTokens.presetIds.first()
@@ -302,6 +318,7 @@ private fun AppShell(repository: TaskRepository, startIntent: Intent?) {
             AppNavHost(
                 navController = navController,
                 repository = repository,
+                dashboards = dashboardRepository,
                 modifier = Modifier.padding(padding),
             )
         }

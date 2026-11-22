@@ -34,6 +34,13 @@ The Android client now has a real Compose navigation shell rather than a single 
 - The Phase 3 token-driven parity showcase remains available at the `design-system` destination. The theme still reads generated tokens; generated artifacts were not hand-edited.
 - Every user-facing string lives in `res/values/strings.xml` and `res/values-ta/strings.xml` with Tamil translations.
 
+## Phase 5 status (static implementation)
+
+- A `dashboards` Room table was added in database v3 with a non-destructive `MIGRATION_2_3` that only creates the new table and its index. `settings` and `tasks` rows are untouched; there is no `fallbackToDestructiveMigration`.
+- `DashboardRepository` mirrors the web contract: one default dashboard on first run, create/rename/duplicate/delete/reorder/set-default, per-dashboard widget layouts, add/hide/remove/reset, and a stable sixteen-widget identifier set. Only the four task-backed widgets are seeded; the rest render honest empty states.
+- The dashboard destination now has a selector, dashboard ordering and default controls, an add-widget picker, and widget sections. Weekly and monthly counts use real local task timestamps and show an explicit empty state when no records exist. Dashboard preference layout is stored on this device only; cross-device sync is deferred to the sync phase.
+- All new dashboard and widget strings are present in both English and Tamil resource files. All `R.string` references resolve in both locales.
+
 ## Verification
 
 Runtime verification is **NOT APPLICABLE** in this environment: `ANDROID_HOME` is unset and no Android SDK, emulator, or device is available, so no Gradle build, instrumentation, or on-device check could be run. The implementation was reviewed statically for imports, resource parity between locales, migration SQL, and navigation/deep-link consistency. Run `./gradlew :app:assembleDebug` and exercise deep links, back navigation, task completion, search, both locales, and both themes once an SDK and device are available.

@@ -19,7 +19,12 @@ export async function listTasks(): Promise<TaskRecord[]> {
 
 export async function toggleTask(id: string): Promise<void> {
   const task = await db.tasks.get(id)
-  if (task) await db.tasks.update(id, { completed: !task.completed })
+  if (!task) return
+  const completed = !task.completed
+  await db.tasks.update(id, {
+    completed,
+    completedAt: completed ? new Date().toISOString() : undefined,
+  })
 }
 
 export async function taskProgress(): Promise<ProgressSnapshot> {

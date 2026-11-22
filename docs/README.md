@@ -37,6 +37,7 @@ Runtime gate results, recorded at the end of each phase:
 | [phases/phase-02.md](phases/phase-02.md) | Repository and runnable foundation | Server PASS, Web PASS, Android NOT APPLICABLE |
 | [phases/phase-03.md](phases/phase-03.md) | Design system and appearance | Server PASS, Web PASS, Android NOT APPLICABLE |
 | [phases/phase-04.md](phases/phase-04.md) | Application navigation and layout | Server PASS, Web PASS, Android NOT APPLICABLE |
+| [phases/phase-05.md](phases/phase-05.md) | Dashboard system and widgets | Server PASS, Web PASS, Android NOT APPLICABLE |
 
 ## Change rules
 
