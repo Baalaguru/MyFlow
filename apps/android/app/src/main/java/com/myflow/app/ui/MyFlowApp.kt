@@ -122,6 +122,7 @@ fun MyFlowApp(startIntent: Intent? = null) {
         ) {
             AppShell(
                 repository = repository,
+                habitRepository = habitRepository,
                 startIntent = startIntent,
             )
         }
@@ -129,7 +130,7 @@ fun MyFlowApp(startIntent: Intent? = null) {
 }
 
 @Composable
-private fun AppShell(repository: TaskRepository, startIntent: Intent?) {
+private fun AppShell(repository: TaskRepository, habitRepository: HabitRepository, startIntent: Intent?) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -319,6 +320,7 @@ private fun AppShell(repository: TaskRepository, startIntent: Intent?) {
                 navController = navController,
                 repository = repository,
                 dashboards = dashboardRepository,
+                habits = habitRepository,
                 modifier = Modifier.padding(padding),
             )
         }

@@ -14,6 +14,9 @@ describe('widget contract', () => {
   it('seeds only widgets backed by real local data', () => {
     expect(seedWidgets().map((widget) => widget.id)).toEqual([
       'todoOverview',
+      'habitOverview',
+      'currentStreak',
+      'mascotGrowth',
       'weeklyStatistics',
       'monthlyStatistics',
       'quickCapture',

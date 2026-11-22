@@ -86,6 +86,42 @@ data class DashboardEntity(
     val createdAt: String,
 )
 
+@Entity(tableName = "habits")
+data class HabitEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val description: String = "",
+    val icon: String = "",
+    val accent: String = "",
+    val scheduleType: String = "daily",
+    val weekdays: String = "0,1,2,3,4,5,6",
+    val target: Int? = null,
+    val reminderOffsetMinutes: Int? = null,
+    val paused: Boolean = false,
+    val archived: Boolean = false,
+    val createdAt: String,
+)
+
+@Entity(tableName = "habit_logs")
+data class HabitLogEntity(
+    @PrimaryKey val id: String,
+    val habitId: String,
+    val localDate: String,
+    val status: String,
+    val value: Int? = null,
+    val completedAt: String? = null,
+    val createdAt: String,
+)
+
+@Entity(tableName = "mascot_state")
+data class MascotStateEntity(
+    @PrimaryKey val id: String = "default",
+    val companion: String = "sprout",
+    val plantStyle: String = "fern",
+    val animationsEnabled: Boolean = true,
+    val updatedAt: String,
+)
+
 @Dao
 interface DashboardDao {
     @Query("SELECT * FROM dashboards ORDER BY sortOrder ASC, createdAt ASC")
@@ -117,6 +153,51 @@ interface DashboardDao {
 
     @Query("DELETE FROM dashboards WHERE id = :id")
     suspend fun delete(id: String)
+}
+
+@Dao
+interface HabitDao {
+    @Query("SELECT * FROM habits ORDER BY createdAt ASC")
+    fun observeAll(): Flow<List<HabitEntity>>
+
+    @Query("SELECT * FROM habits ORDER BY createdAt ASC")
+    suspend fun all(): List<HabitEntity>
+
+    @Query("SELECT * FROM habits WHERE id = :id")
+    suspend fun get(id: String): HabitEntity?
+
+    @Upsert
+    suspend fun save(habit: HabitEntity)
+
+    @Query("DELETE FROM habits WHERE id = :id")
+    suspend fun delete(id: String)
+
+    @Query("SELECT * FROM habit_logs ORDER BY localDate ASC")
+    fun observeLogs(): Flow<List<HabitLogEntity>>
+
+    @Query("SELECT * FROM habit_logs ORDER BY localDate ASC")
+    suspend fun logs(): List<HabitLogEntity>
+
+    @Query("SELECT * FROM habit_logs WHERE habitId = :habitId AND localDate = :localDate LIMIT 1")
+    suspend fun logForDay(habitId: String, localDate: String): HabitLogEntity?
+
+    @Upsert
+    suspend fun saveLog(log: HabitLogEntity)
+
+    @Query("DELETE FROM habit_logs WHERE habitId = :habitId AND localDate = :localDate")
+    suspend fun clearLog(habitId: String, localDate: String)
+
+    @Query("DELETE FROM habit_logs WHERE habitId = :habitId")
+    suspend fun deleteLogsForHabit(habitId: String)
+
+    @Query("SELECT * FROM mascot_state WHERE id = 'default' LIMIT 1")
+    fun observeMascot(): Flow<MascotStateEntity?>
+
+    @Query("SELECT * FROM mascot_state WHERE id = 'default' LIMIT 1")
+    suspend fun mascot(): MascotStateEntity?
+
+    @Upsert
+    suspend fun saveMascot(state: MascotStateEntity)
 }
 
 /**
@@ -175,9 +256,36 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+/** Adds habits, habit logs, and mascot state. Existing tables and rows are untouched. */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `habits` (" +
+                "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL DEFAULT '', " +
+                "`icon` TEXT NOT NULL DEFAULT '', `accent` TEXT NOT NULL DEFAULT '', " +
+                "`scheduleType` TEXT NOT NULL DEFAULT 'daily', `weekdays` TEXT NOT NULL DEFAULT '0,1,2,3,4,5,6', " +
+                "`target` INTEGER, `reminderOffsetMinutes` INTEGER, `paused` INTEGER NOT NULL DEFAULT 0, " +
+                "`archived` INTEGER NOT NULL DEFAULT 0, `createdAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `habit_logs` (" +
+                "`id` TEXT NOT NULL, `habitId` TEXT NOT NULL, `localDate` TEXT NOT NULL, " +
+                "`status` TEXT NOT NULL, `value` INTEGER, `completedAt` TEXT, `createdAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_habit_logs_habitId` ON `habit_logs` (`habitId`)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_habit_logs_habitId_localDate` ON `habit_logs` (`habitId`, `localDate`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `mascot_state` (" +
+                "`id` TEXT NOT NULL, `companion` TEXT NOT NULL DEFAULT 'sprout', " +
+                "`plantStyle` TEXT NOT NULL DEFAULT 'fern', `animationsEnabled` INTEGER NOT NULL DEFAULT 1, " +
+                "`updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+    }
+}
+
 @Database(
-    entities = [SettingEntity::class, TaskEntity::class, DashboardEntity::class],
-    version = 4,
+    entities = [SettingEntity::class, TaskEntity::class, DashboardEntity::class, HabitEntity::class, HabitLogEntity::class, MascotStateEntity::class],
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(TaskJsonConverters::class)
@@ -185,6 +293,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun settingDao(): SettingDao
     abstract fun taskDao(): TaskDao
     abstract fun dashboardDao(): DashboardDao
+    abstract fun habitDao(): HabitDao
 
     companion object {
         @Volatile
@@ -197,7 +306,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "myflow.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build().also { instance = it }
             }
     }

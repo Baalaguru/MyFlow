@@ -10,7 +10,7 @@ This is the single source of truth for architectural decisions. Product requirem
 
 ## Architecture Decision Records
 
-See [adr/README.md](adr/README.md) for the index of ADR-0001 … ADR-0021.
+See [adr/README.md](adr/README.md) for the index of ADR-0001 … ADR-0022.
 
 ## Architecture specifications
 
@@ -39,6 +39,7 @@ Runtime gate results, recorded at the end of each phase:
 | [phases/phase-04.md](phases/phase-04.md) | Application navigation and layout | Server PASS, Web PASS, Android NOT APPLICABLE |
 | [phases/phase-05.md](phases/phase-05.md) | Dashboard system and widgets | Server PASS, Web PASS, Android NOT APPLICABLE |
 | [phases/phase-06.md](phases/phase-06.md) | To-Do task management | Server PASS, Web PASS, Android NOT APPLICABLE |
+| [phases/phase-07.md](phases/phase-07.md) | Habit tracker and mascot integration | Server PASS, Web PASS, Android NOT APPLICABLE |
 
 ## Change rules
 

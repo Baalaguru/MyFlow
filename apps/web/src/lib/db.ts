@@ -43,6 +43,47 @@ export interface TaskRecord {
   completedAt?: string
 }
 
+export type HabitScheduleType = 'daily' | 'weekdays' | 'custom'
+export type HabitLogStatus = 'done' | 'skipped' | 'rest'
+
+/** Weekday mask: 0=Sun..6=Sat, matching JS Date.getDay(). */
+export interface HabitSchedule {
+  type: HabitScheduleType
+  weekdays: number[]
+}
+
+export interface HabitRecord {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+  accent?: string
+  schedule: HabitSchedule
+  target?: number
+  reminderOffsetMinutes?: number
+  paused: boolean
+  archived: boolean
+  createdAt: string
+}
+
+export interface HabitLogRecord {
+  id: string
+  habitId: string
+  localDate: string
+  status: HabitLogStatus
+  value?: number
+  completedAt?: string
+  createdAt: string
+}
+
+export interface MascotStateRecord {
+  id: 'default'
+  companion: string
+  plantStyle: string
+  animationsEnabled: boolean
+  updatedAt: string
+}
+
 export interface WidgetConfig {
   id: WidgetId
   columns: number
@@ -65,6 +106,9 @@ class MyFlowDatabase extends Dexie {
   settings!: Table<SettingRecord, string>
   tasks!: Table<TaskRecord, string>
   dashboards!: Table<DashboardRecord, string>
+  habits!: Table<HabitRecord, string>
+  habitLogs!: Table<HabitLogRecord, string>
+  mascotState!: Table<MascotStateRecord, string>
 
   constructor() {
     super('myflow')
@@ -81,6 +125,14 @@ class MyFlowDatabase extends Dexie {
       settings: 'key',
       tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
       dashboards: 'id, order, isDefault',
+    })
+    this.version(4).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
+      dashboards: 'id, order, isDefault',
+      habits: 'id, paused, archived, createdAt',
+      habitLogs: 'id, habitId, localDate, [habitId+localDate], status',
+      mascotState: 'id',
     })
   }
 }

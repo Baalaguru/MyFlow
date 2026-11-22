@@ -34,9 +34,9 @@ export interface WidgetDefinition {
 
 export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   todoOverview: { id: 'todoOverview', nameKey: 'widgetTodo', noteKey: 'widgetNoteTodo', available: true, columns: 6, rows: 1 },
-  habitOverview: { id: 'habitOverview', nameKey: 'widgetHabits', noteKey: 'widgetNoteHabits', available: false, columns: 4, rows: 1 },
-  currentStreak: { id: 'currentStreak', nameKey: 'widgetStreak', noteKey: 'widgetNoteStreak', available: false, columns: 4, rows: 1 },
-  mascotGrowth: { id: 'mascotGrowth', nameKey: 'widgetMascot', noteKey: 'widgetNoteMascot', available: false, columns: 4, rows: 1 },
+  habitOverview: { id: 'habitOverview', nameKey: 'widgetHabits', noteKey: 'widgetNoteHabits', available: true, columns: 4, rows: 1 },
+  currentStreak: { id: 'currentStreak', nameKey: 'widgetStreak', noteKey: 'widgetNoteStreak', available: true, columns: 4, rows: 1 },
+  mascotGrowth: { id: 'mascotGrowth', nameKey: 'widgetMascot', noteKey: 'widgetNoteMascot', available: true, columns: 4, rows: 1 },
   gymOverview: { id: 'gymOverview', nameKey: 'widgetGym', noteKey: 'widgetNoteGym', available: false, columns: 4, rows: 1 },
   walkingOverview: { id: 'walkingOverview', nameKey: 'widgetWalking', noteKey: 'widgetNoteWalking', available: false, columns: 4, rows: 1 },
   jumpRopeOverview: { id: 'jumpRopeOverview', nameKey: 'widgetJumpRope', noteKey: 'widgetNoteJumpRope', available: false, columns: 4, rows: 1 },
@@ -95,6 +95,9 @@ export function normaliseWidgetConfig(
 
 export const seedWidgetIds: WidgetId[] = [
   'todoOverview',
+  'habitOverview',
+  'currentStreak',
+  'mascotGrowth',
   'weeklyStatistics',
   'monthlyStatistics',
   'quickCapture',

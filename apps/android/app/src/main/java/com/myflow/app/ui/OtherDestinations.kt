@@ -32,8 +32,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.myflow.app.R
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.TaskRepository
 import com.myflow.app.data.WidgetIds
+import com.myflow.app.data.aggregateHabitCompletion
+import com.myflow.app.data.calculateHabitStreaks
+import com.myflow.app.data.mascotProgress
 import com.myflow.app.data.progressForTasks
 import kotlinx.coroutines.launch
 import com.myflow.app.ui.navigation.AppDestinations
@@ -87,9 +91,11 @@ private fun <T> List<T>.swapped(first: Int, second: Int): List<T> = toMutableLis
 }
 
 @Composable
-fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository) {
+fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository, habits: HabitRepository) {
     val tasks by repository.observeTasks().collectAsState(initial = emptyList())
     val rows by dashboards.observe().collectAsState(initial = emptyList())
+    val habitRows by habits.observeHabits().collectAsState(initial = emptyList())
+    val habitLogs by habits.observeLogs().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var composing by remember { mutableStateOf(false) }
@@ -268,6 +274,35 @@ fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository)
                 if (widget.id == WidgetIds.TODO_OVERVIEW && tasks.isNotEmpty()) {
                     Text(
                         text = "${completed} / ${tasks.size}",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                if (widget.id == WidgetIds.HABIT_OVERVIEW) {
+                    val progress = aggregateHabitCompletion(habitRows.filter { !it.paused && !it.archived }, habitLogs, 7)
+                    Text(
+                        text = if (progress.available) "${progress.percent}%" else stringResource(R.string.habit_no_data),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                if (widget.id == WidgetIds.CURRENT_STREAK) {
+                    val best = habitRows.filter { !it.paused && !it.archived }
+                        .maxByOrNull { calculateHabitStreaks(it, habitLogs).first }
+                    val streak = best?.let { calculateHabitStreaks(it, habitLogs).first }
+                    Text(
+                        text = streak?.toString() ?: stringResource(R.string.habit_no_data),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                if (widget.id == WidgetIds.MASCOT_GROWTH) {
+                    val mascot = mascotProgress(habitRows, habitLogs)
+                    val stageRes = when (mascot.stage) {
+                        "sprout" -> R.string.mascot_stage_sprout
+                        "bloom" -> R.string.mascot_stage_bloom
+                        "grove" -> R.string.mascot_stage_grove
+                        else -> R.string.mascot_stage_seed
+                    }
+                    Text(
+                        text = if (habitRows.none { !it.archived }) stringResource(R.string.mascot_no_habits) else stringResource(stageRes),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }

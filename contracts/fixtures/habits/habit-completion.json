@@ -1,0 +1,40 @@
+{
+  "rule": "habit.completion",
+  "cases": [
+    {
+      "case": "scheduled days are denominator; skipped counts as scheduled non-completion",
+      "input": {
+        "today": "2026-11-08",
+        "habit": {
+          "id": "h1",
+          "createdAt": "2026-11-01T00:00:00.000Z",
+          "paused": false,
+          "archived": false,
+          "schedule": { "type": "weekdays", "weekdays": [1,2,3,4,5] }
+        },
+        "logs": [
+          { "habitId": "h1", "localDate": "2026-11-03", "status": "done" },
+          { "habitId": "h1", "localDate": "2026-11-04", "status": "skipped" }
+        ],
+        "range": ["2026-11-03", "2026-11-04", "2026-11-08"]
+      },
+      "expected": { "completed": 1, "total": 2, "percent": 50, "available": true }
+    },
+    {
+      "case": "no scheduled days means unavailable",
+      "input": {
+        "today": "2026-11-10",
+        "habit": {
+          "id": "h1",
+          "createdAt": "2026-11-01T00:00:00.000Z",
+          "paused": true,
+          "archived": false,
+          "schedule": { "type": "daily", "weekdays": [0,1,2,3,4,5,6] }
+        },
+        "logs": [],
+        "range": ["2026-11-10"]
+      },
+      "expected": { "completed": 0, "total": 0, "percent": null, "available": false }
+    }
+  ]
+}

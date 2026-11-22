@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type DragEvent } from 'react'
 import type { TranslationKey } from '../../i18n'
 import type { Appearance } from '../../lib/appearance'
-import type { TaskRecord, WidgetConfig } from '../../lib/db'
+import type { HabitLogRecord, HabitRecord, TaskRecord, WidgetConfig } from '../../lib/db'
 import { widgetRegistry } from '../../lib/widgets'
 import { IconButton } from '../ui'
 import { WidgetBody } from './WidgetBody'
@@ -14,6 +14,8 @@ export interface WidgetGridProps {
   widgets: WidgetConfig[]
   t: Translate
   tasks: TaskRecord[]
+  habits: HabitRecord[]
+  habitLogs: HabitLogRecord[]
   appearance: Appearance
   onToggleTask: (id: string) => void
   onSaved: () => void
@@ -30,6 +32,8 @@ export function WidgetGrid({
   widgets,
   t,
   tasks,
+  habits,
+  habitLogs,
   appearance,
   onToggleTask,
   onSaved,
@@ -107,6 +111,8 @@ export function WidgetGrid({
                   widget={widget}
                   t={t}
                   tasks={tasks}
+                  habits={habits}
+                  habitLogs={habitLogs}
                   appearance={appearance}
                   onToggleTask={onToggleTask}
                   onSaved={onSaved}

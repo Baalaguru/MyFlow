@@ -3,7 +3,7 @@ import { WidgetGrid } from '../components/dashboard/WidgetGrid'
 import { Button, ConfirmDialog, Dialog, ErrorState, IconButton, LoadingSkeleton, TextField, Toast } from '../components/ui'
 import type { TranslationKey } from '../i18n'
 import type { Appearance } from '../lib/appearance'
-import { getSetting, setSetting, type DashboardRecord, type TaskRecord, type WidgetConfig } from '../lib/db'
+import { getSetting, setSetting, type DashboardRecord, type HabitLogRecord, type HabitRecord, type TaskRecord, type WidgetConfig } from '../lib/db'
 import {
   addWidget,
   createDashboard,
@@ -19,6 +19,7 @@ import {
   saveWidgetLayout,
   setDefaultDashboard,
 } from '../lib/modules/dashboards'
+import { listHabitLogs, listHabits } from '../lib/modules/habits'
 import { listTasks, toggleTask } from '../lib/modules/tasks'
 import { accentTokens, backgroundTokens, widgetRegistry, widgetIds, type AccentToken, type BackgroundToken } from '../lib/widgets'
 
@@ -45,6 +46,8 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const [dashboards, setDashboards] = useState<DashboardRecord[] | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [tasks, setTasks] = useState<TaskRecord[]>([])
+  const [habits, setHabits] = useState<HabitRecord[]>([])
+  const [habitLogs, setHabitLogs] = useState<HabitLogRecord[]>([])
   const [problem, setProblem] = useState(false)
   const [toast, setToast] = useState<TranslationKey | null>(null)
 
@@ -60,15 +63,19 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const load = useCallback(async () => {
     setProblem(false)
     try {
-      const [rows, storedId, localTasks] = await Promise.all([
+      const [rows, storedId, localTasks, localHabits, localLogs] = await Promise.all([
         ensureDefaultDashboard(),
         getSetting<string | null>(ACTIVE_KEY, null),
         listTasks(),
+        listHabits(),
+        listHabitLogs(),
       ])
       const active = rows.find((row) => row.id === storedId) ?? rows.find((row) => row.isDefault) ?? rows[0]
       setDashboards(rows)
       setActiveId(active?.id ?? null)
       setTasks(localTasks)
+      setHabits(localHabits)
+      setHabitLogs(localLogs)
     } catch {
       setProblem(true)
     }
@@ -85,7 +92,10 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const active = dashboards?.find((row) => row.id === activeId) ?? null
 
   const refreshTasks = async () => {
-    setTasks(await listTasks())
+    const [localTasks, localHabits, localLogs] = await Promise.all([listTasks(), listHabits(), listHabitLogs()])
+    setTasks(localTasks)
+    setHabits(localHabits)
+    setHabitLogs(localLogs)
     onSaved()
   }
 
@@ -304,6 +314,8 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
         widgets={active.widgets}
         t={t}
         tasks={tasks}
+        habits={habits}
+        habitLogs={habitLogs}
         appearance={appearance}
         onToggleTask={(id) => void handleToggleTask(id)}
         onSaved={() => void refreshTasks()}

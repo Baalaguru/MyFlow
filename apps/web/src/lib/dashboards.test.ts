@@ -18,7 +18,7 @@ describe('dashboard layout helpers', () => {
       widgets[1].id,
       widgets[2].id,
       widgets[0].id,
-      widgets[3].id,
+      ...widgets.slice(3).map((widget) => widget.id),
     ])
     expect(widgets.map((widget) => widget.id)).toEqual(seedWidgets().map((widget) => widget.id))
   })
