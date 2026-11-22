@@ -5,7 +5,7 @@ export type PresetId = (typeof presetIds)[number]
 export const presetLabelKeys: Record<PresetId, string> = {"vintageLibrary":"presetVintageLibrary","botanicalGarden":"presetBotanicalGarden","autumnJournal":"presetAutumnJournal","coffeeAndPaper":"presetCoffeeAndPaper","oliveVintage":"presetOliveVintage","custom":"presetCustom"}
 export const customPresets: PresetId[] = ["custom"]
 export const isCustomPreset = (id: PresetId): boolean => customPresets.includes(id)
-export const moduleAccents: Record<string, string> = {"dashboard":"primary","tasks":"primary","habits":"growth","gym":"highlight","food":"growth","cardio":"highlight","finance":"primary"}
+export const moduleAccents: Record<string, string> = {"dashboard":"primary","tasks":"primary","habits":"growth","mascot":"growth","gym":"highlight","food":"growth","cardio":"highlight","finance":"primary"}
 export const stateRoles: Record<string, string> = {"selected":"primary","hover":"surfaceAlt","focus":"focus","disabled":"disabled"}
 export const primitiveColors: Record<string, string> = {"parchment":"#F3EBDD","paper":"#E4D7C1","leather":"#70563B","sage":"#788064","terracotta":"#A36F59","ink":"#3B332B"}
 export const fontPreferenceIds = ["vintage","reading","clear"] as const

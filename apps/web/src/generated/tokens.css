@@ -403,6 +403,7 @@
 [data-module="dashboard"] { --mf-module-accent: var(--mf-primary); }
 [data-module="tasks"] { --mf-module-accent: var(--mf-primary); }
 [data-module="habits"] { --mf-module-accent: var(--mf-growth); }
+[data-module="mascot"] { --mf-module-accent: var(--mf-growth); }
 [data-module="gym"] { --mf-module-accent: var(--mf-highlight); }
 [data-module="food"] { --mf-module-accent: var(--mf-growth); }
 [data-module="cardio"] { --mf-module-accent: var(--mf-highlight); }

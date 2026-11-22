@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { db } from '../lib/db'
+import { addTask } from '../lib/modules/tasks'
 import { BottomSheet, Button, TextArea, Toast } from './ui'
 
 interface QuickCaptureProps {
@@ -28,12 +28,7 @@ export function QuickCapture({ open, onClose, onSaved, labels, trigger }: QuickC
     const title = value.trim()
     if (!title) return
     try {
-      await db.tasks.add({
-        id: crypto.randomUUID(),
-        title,
-        completed: false,
-        createdAt: new Date().toISOString(),
-      })
+      await addTask(title)
       setValue('')
       setProblem(false)
       setToast(true)

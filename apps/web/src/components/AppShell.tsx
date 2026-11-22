@@ -1,54 +1,49 @@
 import { useState, type ReactNode } from 'react'
 import type { Locale, TranslationKey } from '../i18n'
 import type { Appearance, ColorMode } from '../lib/appearance'
+import { navRouteIds, routeLabelKeys, type RouteId } from '../lib/routes'
+import { GlobalSearch } from './GlobalSearch'
 import { QuickCapture } from './QuickCapture'
 import { StatusPill } from './StatusPill'
 import { ThemeToggle } from './ThemeToggle'
-import { Breadcrumbs, IconButton, MobileNav, SearchField, type NavItem } from './ui'
-
-export const sectionKeys: TranslationKey[] = [
-  'navDashboard',
-  'navTasks',
-  'navHabits',
-  'navGym',
-  'navFood',
-  'navCardio',
-  'navFinance',
-  'navSettings',
-  'navDesignSystem',
-]
+import { Breadcrumbs, IconButton, MobileNav, type NavItem } from './ui'
 
 interface AppShellProps {
   t: (key: TranslationKey) => string
-  active: number
-  onSelect: (index: number) => void
+  route: RouteId
+  onNavigate: (route: RouteId) => void
+  onBack: () => void
+  onForward: () => void
+  canBack: boolean
+  canForward: boolean
   online: boolean
   appearance: Appearance
   onModeChange: (mode: ColorMode) => void
   locale: Locale
   onLocaleChange: (locale: Locale) => void
-  search: string
-  onSearchChange: (value: string) => void
   onQuickCaptureSaved: () => void
   children: ReactNode
 }
 
 export function AppShell({
   t,
-  active,
-  onSelect,
+  route,
+  onNavigate,
+  onBack,
+  onForward,
+  canBack,
+  canForward,
   online,
   appearance,
   onModeChange,
   locale,
   onLocaleChange,
-  search,
-  onSearchChange,
   onQuickCaptureSaved,
   children,
 }: AppShellProps) {
   const [captureOpen, setCaptureOpen] = useState(false)
-  const navItems: NavItem[] = sectionKeys.map((key, index) => ({ key: String(index), label: t(key) }))
+  const navItems: NavItem[] = navRouteIds.map((id) => ({ key: id, label: t(routeLabelKeys[id]) }))
+  const activeIndex = navRouteIds.indexOf(route)
 
   return (
     <div className="flex min-h-screen">
@@ -66,11 +61,11 @@ export function AppShell({
             <button
               key={item.key}
               type="button"
-              onClick={() => onSelect(index)}
-              aria-current={active === index ? 'page' : undefined}
+              onClick={() => onNavigate(navRouteIds[index])}
+              aria-current={activeIndex === index ? 'page' : undefined}
               className="min-h-[44px] w-full rounded-lg px-3 py-2 text-left text-sm"
               style={
-                active === index
+                activeIndex === index
                   ? { backgroundColor: 'var(--mf-primary)', color: 'var(--mf-onPrimary)' }
                   : { color: 'var(--mf-text)' }
               }
@@ -85,23 +80,29 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4 md:px-9"
+          className="flex flex-wrap items-center gap-3 border-b px-5 py-4 md:px-9"
           style={{ borderColor: 'var(--mf-border)' }}
         >
+          <div className="flex items-center gap-1">
+            <IconButton label={t('back')} onClick={onBack} disabled={!canBack}>
+              <span aria-hidden="true">←</span>
+            </IconButton>
+            <IconButton label={t('forward')} onClick={onForward} disabled={!canForward}>
+              <span aria-hidden="true">→</span>
+            </IconButton>
+          </div>
+
           <div className="md:hidden">
             <p className="font-display text-2xl" style={{ fontFamily: 'var(--mf-active-font-appTitle)' }}>
               {t('appTitle')}
             </p>
           </div>
-          <div className="ml-auto flex w-full flex-wrap items-center gap-3 md:w-auto">
-            <div className="hidden min-w-[200px] flex-1 lg:block">
-              <SearchField
-                label={t('searchPlaceholder')}
-                placeholder={t('searchPlaceholder')}
-                value={search}
-                onChange={onSearchChange}
-              />
-            </div>
+
+          <div className="order-last w-full min-w-0 lg:order-none lg:ml-auto lg:w-auto lg:flex-1">
+            <GlobalSearch t={t} onNavigate={onNavigate} />
+          </div>
+
+          <div className="ml-auto flex flex-wrap items-center gap-3 lg:ml-0">
             <QuickCapture
               open={captureOpen}
               onClose={() => setCaptureOpen(false)}
@@ -138,16 +139,19 @@ export function AppShell({
             >
               {locale === 'en' ? t('languageTamil') : t('languageEnglish')}
             </button>
+            <IconButton label={t('navProfile')} onClick={() => onNavigate('profile')}>
+              <span aria-hidden="true">◎</span>
+            </IconButton>
           </div>
         </header>
 
-        <MobileNav items={navItems} active={active} onSelect={onSelect} label={t('modulesLabel')} />
+        <MobileNav items={navItems} active={activeIndex} onSelect={(index) => onNavigate(navRouteIds[index])} label={t('modulesLabel')} />
 
-        <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-9">
+        <main data-module={route} className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-9">
           <div className="mb-6">
             <Breadcrumbs
               label={t('navigationSection')}
-              items={[t('breadcrumbHome'), t(sectionKeys[active])]}
+              items={[t('breadcrumbHome'), t(routeLabelKeys[route])]}
             />
           </div>
           {children}

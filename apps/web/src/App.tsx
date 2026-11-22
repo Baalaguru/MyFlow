@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
-import { AppShell, sectionKeys } from './components/AppShell'
+import { AppShell } from './components/AppShell'
+import { useHashRoute } from './hooks/useHashRoute'
 import { useOnline } from './hooks/useOnline'
 import { readLocale, saveLocale, translate, type Locale, type TranslationKey } from './i18n'
 import {
@@ -10,7 +11,11 @@ import {
   type Appearance,
   type ColorMode,
 } from './lib/appearance'
+import { moduleRouteIds, type RouteId } from './lib/routes'
 import { DashboardPage } from './pages/DashboardPage'
+import { EmptyModuleWorkspace, type EmptyModuleRoute } from './pages/ModuleWorkspaces'
+import { ProfilePage } from './pages/ProfilePage'
+import { TasksWorkspace } from './pages/TasksWorkspace'
 
 const SettingsPage = lazy(() =>
   import('./pages/SettingsPage').then((module) => ({ default: module.SettingsPage })),
@@ -19,16 +24,16 @@ const DesignSystemPage = lazy(() =>
   import('./pages/DesignSystemPage').then((module) => ({ default: module.DesignSystemPage })),
 )
 
-const plannedStart = 1
-const plannedEnd = 6
-const settingsIndex = 7
-const designSystemIndex = 8
+const emptyModuleRoutes = moduleRouteIds.filter((route) => route !== 'tasks') as EmptyModuleRoute[]
+
+function isEmptyModuleRoute(route: RouteId): route is EmptyModuleRoute {
+  return (emptyModuleRoutes as readonly RouteId[]).includes(route)
+}
 
 export default function App() {
-  const [active, setActive] = useState(0)
+  const { route, navigate, back, forward, canBack, canForward } = useHashRoute()
   const [locale, setLocale] = useState<Locale>(readLocale)
   const [appearance, setAppearance] = useState<Appearance>(readAppearance)
-  const [search, setSearch] = useState('')
   const [captureRevision, setCaptureRevision] = useState(0)
   const online = useOnline()
 
@@ -57,40 +62,37 @@ export default function App() {
 
   const resetAppearance = () => setAppearance({ ...DEFAULT_APPEARANCE, custom: {} })
 
+  const page = () => {
+    if (route === 'dashboard') return <DashboardPage t={t} revision={captureRevision} />
+    if (route === 'tasks') {
+      return <TasksWorkspace t={t} revision={captureRevision} onSaved={() => setCaptureRevision((value) => value + 1)} />
+    }
+    if (isEmptyModuleRoute(route)) return <EmptyModuleWorkspace route={route} t={t} />
+    if (route === 'profile') return <ProfilePage t={t} onNavigate={navigate} />
+    if (route === 'appearance') {
+      return <SettingsPage appearance={appearance} onChange={setAppearance} onReset={resetAppearance} t={t} />
+    }
+    if (route === 'design-system') return <DesignSystemPage t={t} appearance={appearance} />
+    return null
+  }
+
   return (
     <AppShell
       t={t}
-      active={active}
-      onSelect={setActive}
+      route={route}
+      onNavigate={navigate}
+      onBack={back}
+      onForward={forward}
+      canBack={canBack}
+      canForward={canForward}
       online={online}
       appearance={appearance}
       onModeChange={changeMode}
       locale={locale}
       onLocaleChange={changeLocale}
-      search={search}
-      onSearchChange={setSearch}
       onQuickCaptureSaved={() => setCaptureRevision((value) => value + 1)}
     >
-      <Suspense fallback={<div className="panel p-6">{t('loadingLabel')}</div>}>
-        {active === 0 ? (
-          <DashboardPage t={t} revision={captureRevision} />
-        ) : active >= plannedStart && active <= plannedEnd ? (
-          <div className="panel p-8">
-            <h1>{t(sectionKeys[active])}</h1>
-            <p className="muted mt-3">{t('plannedTitle')}</p>
-            <p className="muted mt-1 text-sm">{t('plannedNote')}</p>
-          </div>
-        ) : active === settingsIndex ? (
-          <SettingsPage
-            appearance={appearance}
-            onChange={setAppearance}
-            onReset={resetAppearance}
-            t={t}
-          />
-        ) : active === designSystemIndex ? (
-          <DesignSystemPage t={t} appearance={appearance} />
-        ) : null}
-      </Suspense>
+      <Suspense fallback={<div className="panel p-6">{t('loadingLabel')}</div>}>{page()}</Suspense>
     </AppShell>
   )
 }

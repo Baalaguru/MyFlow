@@ -45,4 +45,134 @@
     <string name="sample_statistics">12 / 18</string>
 
     <string name="widget_status">மாதிரித் தரவு எதுவும் காட்டப்படவில்லை</string>
+
+    <!-- Phase 4: destinations and shell -->
+    <string name="nav_dashboard">முகப்பு</string>
+    <string name="nav_tasks">பணிகள்</string>
+    <string name="nav_habits">பழக்கங்கள்</string>
+    <string name="nav_mascot">நண்பன்</string>
+    <string name="nav_gym">உடற்பயிற்சி</string>
+    <string name="nav_food">உணவு</string>
+    <string name="nav_cardio">கார்டியோ</string>
+    <string name="nav_finance">நிதி</string>
+    <string name="nav_appearance">தோற்றம்</string>
+    <string name="nav_design_system">வடிவமைப்பு முறை</string>
+    <string name="nav_profile">சுயவிவரம்</string>
+    <string name="modules_label">தொகுதிகள்</string>
+    <string name="state_selected">தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="action_back">பின்</string>
+    <string name="action_menu">மெனு</string>
+    <string name="action_search">தேடு</string>
+    <string name="action_close_search">தேடலை மூடு</string>
+    <string name="status_phase4">கட்டம் 4 இணக்கம்: டோக்கன் அடிப்படையிலான நிறத் தொகுப்பும் எழுத்துருக்களும்.</string>
+
+    <!-- Search -->
+    <string name="search_title">தேடல் முடிவுகள்</string>
+    <string name="search_query_label">உள்ளூர் பணிகளைத் தேடு</string>
+    <string name="search_hint">உள்ளூர் பணித் தலைப்புகளை மட்டும் தேடும்.</string>
+    <string name="search_no_matches">இந்தத் தேடலுக்கு உள்ளூர் பதிவுகள் இல்லை.</string>
+    <string name="group_tasks">பணிகள்</string>
+    <string name="search_result_open_format">திறந்த பணி: %1$s</string>
+    <string name="search_result_done_format">நிறைவேற்றிய பணி: %1$s</string>
+
+    <!-- Shared workspace primitives -->
+    <string name="module_actions">செயல்கள்</string>
+    <string name="module_filters">வடிகட்டிகள்</string>
+    <string name="progress_label">முன்னேற்றம்</string>
+    <string name="progress_value_unavailable">கிடைக்கவில்லை</string>
+    <string name="progress_completed_of">%1$d / %2$d நிறைவேற்றப்பட்டது</string>
+    <string name="progress_unavailable">இந்தத் தொகுதியில் பதிவுகளும் இலக்கும் இருக்கும்போது முன்னேற்றம் காட்டப்படும்.</string>
+    <string name="records_count">பதிவுகள்</string>
+    <string name="tasks_done">முடிந்தது</string>
+    <string name="tasks_open">நிலுவையில்</string>
+    <string name="not_recorded">பதிவு செய்யப்படவில்லை</string>
+    <string name="empty_title">இங்கு இன்னும் எதுவும் இல்லை</string>
+    <string name="actions_available_later">பதிவுகள் இருக்கும்போது தொகுதிச் செயல்கள் தோன்றும்.</string>
+    <string name="filters_available_later">பதிவுகள் இருக்கும்போது வடிகட்டிகள் கிடைக்கும்.</string>
+
+    <!-- Tasks workspace -->
+    <string name="workspace_subtitle_tasks">செய்ய வேண்டியதைப் பதிவு செய்து, நிறைவேற்றி, மதிப்பிடுங்கள்.</string>
+    <string name="filter_all">அனைத்தும்</string>
+    <string name="filter_open">நிலுவையில்</string>
+    <string name="filter_done">நிறைவேற்றியது</string>
+    <string name="task_list_label">பணிகள்</string>
+    <string name="task_title_label">பணித் தலைப்பு</string>
+    <string name="new_task">புதிய பணி</string>
+    <string name="save_action">சேமி</string>
+    <string name="cancel_action">ரத்து செய்</string>
+    <string name="task_status_open">நிலுவையில்</string>
+    <string name="task_status_done">நிறைவேற்றியது</string>
+    <string name="mark_complete">நிறைவேற்று</string>
+    <string name="mark_open">மீண்டும் திற</string>
+    <string name="module_empty_tasks">இன்னும் பணிகள் இல்லை. இங்கே சேர்க்கப்படும் பணிகள் இந்தச் சாதனத்தில் சேமிக்கப்படும்.</string>
+    <string name="no_tasks_in_view">இந்தக் காட்சியில் பணிகள் இல்லை.</string>
+
+    <!-- Other module workspaces -->
+    <string name="workspace_subtitle_habits">சிறு பழக்கங்கள், அமைதியாகப் பேணப்படுகின்றன.</string>
+    <string name="workspace_subtitle_mascot">உங்கள் நண்பன் தொடர்ச்சியான பழக்கங்களுடன் வளரும்.</string>
+    <string name="workspace_subtitle_gym">பயிற்சிகளும் தொகுப்புகளும் திட்டமிட்டபடி பதிவு செய்யப்படும்.</string>
+    <string name="workspace_subtitle_food">உணவும் ஊட்டச்சத்தும் கற்பனை எண்களின்றி.</string>
+    <string name="workspace_subtitle_cardio">தூரமும் வேகமும் அளக்கப்பட்டபோது மட்டும்.</string>
+    <string name="workspace_subtitle_finance">ரூபாய் மற்றும் பைசையில் செலவுகள் மட்டும்.</string>
+    <string name="module_empty_habits">இன்னும் பழக்கங்கள் இல்லை. பழக்கங்கள் சேர்க்கப்பட்டால் அட்டவணை இங்கே தோன்றும்.</string>
+    <string name="module_empty_mascot">இன்னும் வளர்ச்சி இல்லை. பழக்கங்கள் நிறைவேறும்போது உங்கள் நண்பன் வளருவார்.</string>
+    <string name="module_empty_gym">இன்னும் பயிற்சிகள் பதிவு செய்யப்படவில்லை.</string>
+    <string name="module_empty_food">இன்னும் உணவுகள் பதிவு செய்யப்படவில்லை.</string>
+    <string name="module_empty_cardio">இன்னும் செயல்பாடுகள் பதிவு செய்யப்படவில்லை.</string>
+    <string name="module_empty_finance">இன்னும் செலவுகள் பதிவு செய்யப்படவில்லை.</string>
+    <string name="schedule_label">அட்டவணை</string>
+    <string name="day_monday">திங்கள்</string>
+    <string name="day_tuesday">செவ்வாய்</string>
+    <string name="day_wednesday">புதன்</string>
+    <string name="day_thursday">வியாழன்</string>
+    <string name="day_friday">வெள்ளி</string>
+    <string name="day_saturday">சனி</string>
+    <string name="day_sunday">ஞாயிறு</string>
+    <string name="mascot_stage_label">நண்பன் நிலை</string>
+    <string name="mascot_stage_note">பழக்கங்கள் பதிவு செய்யப்படும் வரை வளர்ச்சி காட்டப்படாது.</string>
+    <string name="gym_plan_label">பயிற்சித் திட்டம்</string>
+    <string name="gym_warmup">சூடுபடுத்தல்</string>
+    <string name="gym_main">முதன்மைத் தொகுப்பு</string>
+    <string name="gym_cooldown">ஓய்வு</string>
+    <string name="food_meals_label">உணவுகள்</string>
+    <string name="food_breakfast">காலை உணவு</string>
+    <string name="food_lunch">மதிய உணவு</string>
+    <string name="food_dinner">இரவு உணவு</string>
+    <string name="cardio_measure_label">அளவீடுகள்</string>
+    <string name="cardio_distance">தூரம்</string>
+    <string name="cardio_duration">கால அளவு</string>
+    <string name="cardio_sensor_note">இந்தப் பயன்பாடு உணரி அல்லது இருப்பிடத் தரவைப் படிக்காது.</string>
+    <string name="finance_ledger_label">கணக்கேடு</string>
+    <string name="finance_income">வருமானம்</string>
+    <string name="finance_expense">செலவுகள்</string>
+    <string name="finance_net">நிகரம்</string>
+    <string name="finance_note">இந்தப் பயன்பாடு கணக்கு அல்லது பரிவர்த்தனைத் தரவைப் படிக்காது.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_subtitle">உங்கள் நாள், ஒரு பார்வையில்.</string>
+    <string name="local_first_note">உள்ளூர் முதல் — சேவையகம் இல்லாமல் இந்தத் திரை வேலை செய்கிறது</string>
+    <string name="tasks_in_local_store">உள்ளூர் சேமிப்பிலுள்ள பணிகள்</string>
+    <string name="foundation_ready">அடித்தளம் தயார்</string>
+    <string name="foundation_note">உள்ளூர் சேமிப்பு, தீம், மொழிகள் தயார்.</string>
+    <string name="foundation_item_storage">உள்ளூர் சேமிப்பு</string>
+    <string name="foundation_item_themes">ஒளி மற்றும் இருண்ட தீங்கள்</string>
+    <string name="foundation_item_languages">ஆங்கிலம் மற்றும் தமிழ்</string>
+    <string name="foundation_item_status">இணையமின்றி இயங்கும் நிலை</string>
+
+    <!-- Appearance, profile, deep links -->
+    <string name="appearance_title">தோற்றம்</string>
+    <string name="appearance_subtitle">நிறங்களும் எழுத்துக்களும் உருவாக்கப்பட்ட டோக்கன்களைப் பின்பற்றும்.</string>
+    <string name="appearance_android_note">இந்தப் பயன்பாடு கணினி நிற முறையையும் உருவாக்கப்பட்ட டோக்கன்களையும் பயன்படுத்தும். விருப்பங்களைத் தொகுக்கும் வசதி பிற்கட்டத்தில் வரும்.</string>
+    <string name="open_design_system">வடிவமைப்பு முறையைத் திற</string>
+    <string name="profile_title">சுயவிவரம்</string>
+    <string name="profile_subtitle">இந்த நிறுவலுக்கு ஒரே ஒரு தனிப்பட்ட சுயவிவரம்.</string>
+    <string name="profile_single_title">தனிப்பட்ட சுயவிவரம்</string>
+    <string name="profile_single_note">என் ஓட்டம் ஒரு தனிப்பட்ட சுயவிவரத்தைப் பயன்படுத்தும். குடும்ப அல்லது பல பயனாளி கணக்குகள் முதல் வெளியீட்டில் இல்லை.</string>
+    <string name="profile_edit_later">சுயவிவரப் பெயர் மற்றும் படம் தொகுக்கும் வசதி பின்னர் அமைப்புகளில் வரும்.</string>
+    <string name="profile_preferences">விருப்பங்கள்</string>
+    <string name="open_appearance">தோற்ற அமைப்புகளைத் திற</string>
+    <string name="section_deep_links">ஆழ இணைப்புகள்</string>
+    <string name="deeplink_app_pattern">myflow://app/{destination}</string>
+    <string name="deeplink_web_pattern">https://myflow.local/{destination}</string>
+    <string name="deeplink_note">ஒரு திரையை நேரடியாகத் திறக்க அதன் வழி அடையாளத்தைப் பாதையாகப் பயன்படுத்தவும்.</string>
 </resources>

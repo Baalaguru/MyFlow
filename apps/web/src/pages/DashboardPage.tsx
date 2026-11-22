@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { db } from '../lib/db'
 import type { TranslationKey } from '../i18n'
+import { listTasks, taskProgress } from '../lib/modules/tasks'
+import { unavailableProgress, type ProgressSnapshot } from '../lib/progress'
 
 type Translate = (key: TranslationKey) => string
 
@@ -13,14 +14,17 @@ const foundationItems: TranslationKey[] = [
 
 export function DashboardPage({ t, revision }: { t: Translate; revision: number }) {
   const [taskCount, setTaskCount] = useState<number | null>(null)
+  const [progress, setProgress] = useState<ProgressSnapshot>(unavailableProgress)
   const [storageError, setStorageError] = useState(false)
 
   useEffect(() => {
     let active = true
-    db.tasks
-      .count()
-      .then((count) => {
-        if (active) setTaskCount(count)
+    Promise.all([listTasks(), taskProgress()])
+      .then(([tasks, snapshot]) => {
+        if (active) {
+          setTaskCount(tasks.length)
+          setProgress(snapshot)
+        }
       })
       .catch(() => {
         if (active) setStorageError(true)
@@ -51,7 +55,12 @@ export function DashboardPage({ t, revision }: { t: Translate; revision: number 
         <section className="panel p-5">
           <p className="eyebrow">{t('tasksInLocalStore')}</p>
           <p className="stat-number mt-2">{storageError ? '—' : (taskCount ?? '…')}</p>
-          <p className="muted mt-3 text-sm">{t('noTasksYet')}</p>
+          {taskCount === 0 ? <p className="muted mt-3 text-sm">{t('noTasksYet')}</p> : null}
+          {progress.available ? (
+            <p className="muted mt-3 text-sm">
+              {progress.completed} {t('progressCompletedOf')} {progress.total}
+            </p>
+          ) : null}
         </section>
 
         <section className="panel p-5">

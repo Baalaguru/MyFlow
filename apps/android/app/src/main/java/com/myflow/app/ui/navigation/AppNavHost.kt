@@ -1,0 +1,71 @@
+package com.myflow.app.ui.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
+import com.myflow.app.data.TaskRepository
+import com.myflow.app.ui.AppearanceScreen
+import com.myflow.app.ui.DashboardScreen
+import com.myflow.app.ui.DesignSystemScreen
+import com.myflow.app.ui.ProfileScreen
+import com.myflow.app.ui.workspaces.CardioWorkspace
+import com.myflow.app.ui.workspaces.FinanceWorkspace
+import com.myflow.app.ui.workspaces.FoodWorkspace
+import com.myflow.app.ui.workspaces.GymWorkspace
+import com.myflow.app.ui.workspaces.HabitsWorkspace
+import com.myflow.app.ui.workspaces.MascotWorkspace
+import com.myflow.app.ui.workspaces.TasksWorkspace
+
+/** All eleven stable route ids are real Compose destinations and deep-link paths. */
+@Composable
+fun AppNavHost(
+    navController: NavController,
+    repository: TaskRepository,
+    modifier: Modifier = Modifier,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = AppDestinations.DASHBOARD,
+        modifier = modifier,
+    ) {
+        AppDestinations.all.forEach { destination ->
+            composable(
+                route = destination.id,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = AppDestinations.DEEP_LINK_APP_PREFIX + destination.id
+                    },
+                    navDeepLink {
+                        uriPattern = AppDestinations.DEEP_LINK_WEB_PREFIX + destination.id
+                    },
+                ),
+            ) {
+                when (destination.id) {
+                    AppDestinations.DASHBOARD -> DashboardScreen(repository)
+                    AppDestinations.TASKS -> TasksWorkspace(repository)
+                    AppDestinations.HABITS -> HabitsWorkspace()
+                    AppDestinations.MASCOT -> MascotWorkspace()
+                    AppDestinations.GYM -> GymWorkspace()
+                    AppDestinations.FOOD -> FoodWorkspace()
+                    AppDestinations.CARDIO -> CardioWorkspace()
+                    AppDestinations.FINANCE -> FinanceWorkspace()
+                    AppDestinations.APPEARANCE -> AppearanceScreen(
+                        onOpenDesignSystem = {
+                            navController.navigate(AppDestinations.DESIGN_SYSTEM)
+                        },
+                    )
+
+                    AppDestinations.DESIGN_SYSTEM -> DesignSystemScreen()
+                    AppDestinations.PROFILE -> ProfileScreen(
+                        onOpenAppearance = {
+                            navController.navigate(AppDestinations.APPEARANCE)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}

@@ -86,3 +86,11 @@ Tokens include colors, semantic role mappings, module accents, interaction-state
 - No excessive gradients, decoration, or animation.
 - Identical iconography and interaction semantics across platforms.
 - Charts use the selected theme palette and show meaningful empty/loading/error states; no meaningless charts for modules without data.
+
+## 9. Phase 4 navigation and workspace components
+
+- Module headers, top-centre progress strips, filter bars, action areas, and empty states are now shared components on both clients. `data-module` applies the generated module accent to the whole workspace; Mascot was added to the accent contract and all generated artifacts were regenerated.
+- The progress strip accepts a computed snapshot rather than a raw percentage. When a module has no goal or records it renders an unavailable label and no indicator, following [analytics.md](analytics.md) and [ADR-0013](../adr/0013-analytics-rules.md).
+- Global search is a read-only projection with a stable result shape (`id`, `route`, `title`, `status`); the task provider is the first implementation. Search results deep-link through the same route identifiers as navigation.
+- Android applies the same module workspace primitives with Navigation Compose destinations and resource-backed labels. Runtime verification remains NOT APPLICABLE; see the Phase 4 report.
+- All new navigation, search, progress, and profile strings are present in both i18n bundles and both Android locale resource files.

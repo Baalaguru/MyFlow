@@ -1,37 +1,70 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.myflow.app.ui
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.myflow.app.R
+import com.myflow.app.data.AppDatabase
+import com.myflow.app.data.SearchResult
+import com.myflow.app.data.TaskRepository
+import com.myflow.app.ui.navigation.AppDestinations
+import com.myflow.app.ui.navigation.AppNavHost
+import com.myflow.app.ui.navigation.destinationColors
 import com.myflow.app.ui.theme.GeneratedTokens
 import com.myflow.app.ui.theme.MyFlowTheme
 import com.myflow.app.ui.theme.tokenColor
 import com.myflow.app.ui.theme.tokenPalette
 import com.myflow.app.ui.theme.tokenRoleColor
+import kotlinx.coroutines.launch
 
 private val semanticRoleLabels: List<Pair<String, Int>> = listOf(
     "background" to R.string.role_background,
@@ -53,7 +86,11 @@ private val semanticRoleLabels: List<Pair<String, Int>> = listOf(
 )
 
 @Composable
-fun MyFlowApp() {
+fun MyFlowApp(startIntent: Intent? = null) {
+    val context = LocalContext.current
+    val repository = remember(context.applicationContext) {
+        TaskRepository(AppDatabase.get(context.applicationContext).taskDao())
+    }
     val darkMode = isSystemInDarkTheme()
     val presetId = GeneratedTokens.presetIds.first()
     val fontPreference = GeneratedTokens.fontPreferenceIds.first()
@@ -67,13 +104,289 @@ fun MyFlowApp() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
-            ParityScreen(presetId = presetId, darkMode = darkMode)
+            AppShell(
+                repository = repository,
+                startIntent = startIntent,
+            )
         }
     }
 }
 
 @Composable
-private fun ParityScreen(presetId: String, darkMode: Boolean) {
+private fun AppShell(repository: TaskRepository, startIntent: Intent?) {
+    val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route ?: AppDestinations.DASHBOARD
+    val canGoBack = navController.previousBackStackEntry != null
+
+    var searchOpen by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var results by remember { mutableStateOf(emptyList<SearchResult>()) }
+    val handledIntents = remember { mutableSetOf<Intent>() }
+
+    // Wait until the host has a graph and a start destination before dispatching links.
+    LaunchedEffect(startIntent, backStackEntry) {
+        if (startIntent != null && backStackEntry != null && handledIntents.add(startIntent)) {
+            navController.handleDeepLink(startIntent)
+        }
+    }
+    LaunchedEffect(query, repository) {
+        results = if (query.isBlank()) emptyList() else repository.search(query)
+    }
+
+    fun navigateTo(route: String) {
+        navController.navigate(route) {
+            popUpTo(AppDestinations.DASHBOARD) { inclusive = false }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = stringResource(R.string.modules_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    AppDestinations.all.forEach { destination ->
+                        val selected = destination.id == currentRoute
+                        val (background, foreground) = destinationColors(destination.id)
+                        NavigationDrawerItem(
+                            label = {
+                                Text(
+                                    text = stringResource(destination.labelRes),
+                                    color = if (selected) {
+                                        foreground
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    },
+                                )
+                            },
+                            selected = selected,
+                            onClick = {
+                                navigateTo(destination.id)
+                                scope.launch { drawerState.close() }
+                            },
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(GeneratedTokens.radii.getValue("md").dp))
+                                .background(if (selected) background else Color.Transparent),
+                        )
+                    }
+                }
+            }
+        },
+    ) {
+        Scaffold(
+            topBar = {
+                Column {
+                    TopAppBar(
+                        title = {
+                            Column {
+                                Text(
+                                    text = stringResource(AppDestinations.find(currentRoute).labelRes),
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(GeneratedTokens.radii.getValue("pill").dp))
+                                        .background(
+                                            destinationColors(currentRoute).first,
+                                        )
+                                        .padding(horizontal = 10.dp, vertical = 2.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.state_selected),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = destinationColors(currentRoute).second,
+                                    )
+                                }
+                            }
+                        },
+                        navigationIcon = {
+                            if (canGoBack) {
+                                TextButton(onClick = { navController.navigateUp() }) {
+                                    Text(stringResource(R.string.action_back))
+                                }
+                            } else {
+                                TextButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Text(stringResource(R.string.action_menu))
+                                }
+                            }
+                        },
+                        actions = {
+                            if (canGoBack) {
+                                TextButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Text(stringResource(R.string.action_menu))
+                                }
+                            }
+                            TextButton(onClick = { searchOpen = !searchOpen }) {
+                                Text(
+                                    stringResource(
+                                        if (searchOpen) R.string.action_close_search else R.string.action_search,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                    if (searchOpen) {
+                        SearchPanel(
+                            query = query,
+                            onQueryChange = { query = it },
+                            results = results,
+                            onResultClick = { result ->
+                                searchOpen = false
+                                navigateTo(result.route)
+                            },
+                        )
+                    }
+                }
+            },
+            bottomBar = {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                    AppDestinations.primary.forEach { destination ->
+                        val selected = destination.id == currentRoute
+                        val (background, foreground) = destinationColors(destination.id)
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = { navigateTo(destination.id) },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (selected) {
+                                                foreground
+                                            } else {
+                                                MaterialTheme.colorScheme.outline
+                                            },
+                                        ),
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = stringResource(destination.labelRes),
+                                    color = if (selected) {
+                                        foreground
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            },
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(GeneratedTokens.radii.getValue("md").dp))
+                                .background(if (selected) background else Color.Transparent),
+                        )
+                    }
+                }
+            },
+        ) { padding ->
+            AppNavHost(
+                navController = navController,
+                repository = repository,
+                modifier = Modifier.padding(padding),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchPanel(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    results: List<SearchResult>,
+    onResultClick: (SearchResult) -> Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 4.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                label = { Text(stringResource(R.string.search_query_label)) },
+                placeholder = { Text(stringResource(R.string.search_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Text(
+                text = stringResource(R.string.search_title),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            when {
+                query.isBlank() -> Text(
+                    text = stringResource(R.string.search_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                results.isEmpty() -> Text(
+                    text = stringResource(R.string.search_no_matches),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                else -> Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 220.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    Text(
+                        text = stringResource(R.string.group_tasks),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    results.forEach { result ->
+                        TextButton(onClick = { onResultClick(result) }) {
+                            Text(
+                                text = stringResource(
+                                    if (result.completed) {
+                                        R.string.search_result_done_format
+                                    } else {
+                                        R.string.search_result_open_format
+                                    },
+                                    result.title,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Token-driven parity showcase, now hosted by the design-system destination. */
+@Composable
+fun DesignSystemScreen() {
+    val darkMode = isSystemInDarkTheme()
+    val presetId = GeneratedTokens.presetIds.first()
     val palette = tokenPalette(presetId, darkMode)
 
     Column(
@@ -96,7 +409,7 @@ private fun ParityScreen(presetId: String, darkMode: Boolean) {
                 .padding(horizontal = 14.dp, vertical = 8.dp),
         ) {
             Text(
-                text = stringResource(R.string.status_phase3),
+                text = stringResource(R.string.status_phase4),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

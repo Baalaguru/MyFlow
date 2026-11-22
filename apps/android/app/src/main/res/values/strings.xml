@@ -45,4 +45,134 @@
     <string name="sample_statistics">12 / 18</string>
 
     <string name="widget_status">No sample data shown</string>
+
+    <!-- Phase 4: destinations and shell -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_habits">Habits</string>
+    <string name="nav_mascot">Mascot</string>
+    <string name="nav_gym">Gym</string>
+    <string name="nav_food">Food</string>
+    <string name="nav_cardio">Cardio</string>
+    <string name="nav_finance">Finance</string>
+    <string name="nav_appearance">Appearance</string>
+    <string name="nav_design_system">Design system</string>
+    <string name="nav_profile">Profile</string>
+    <string name="modules_label">Modules</string>
+    <string name="state_selected">Selected</string>
+    <string name="action_back">Back</string>
+    <string name="action_menu">Menu</string>
+    <string name="action_search">Search</string>
+    <string name="action_close_search">Close search</string>
+    <string name="status_phase4">Phase 4 parity: token-driven palette and typography.</string>
+
+    <!-- Search -->
+    <string name="search_title">Search results</string>
+    <string name="search_query_label">Search local tasks</string>
+    <string name="search_hint">Searches local task titles only.</string>
+    <string name="search_no_matches">No local records match this search.</string>
+    <string name="group_tasks">Tasks</string>
+    <string name="search_result_open_format">Open task: %1$s</string>
+    <string name="search_result_done_format">Completed task: %1$s</string>
+
+    <!-- Shared workspace primitives -->
+    <string name="module_actions">Actions</string>
+    <string name="module_filters">Filters</string>
+    <string name="progress_label">Progress</string>
+    <string name="progress_value_unavailable">Unavailable</string>
+    <string name="progress_completed_of">%1$d completed of %2$d</string>
+    <string name="progress_unavailable">Progress appears when this module has records and a goal.</string>
+    <string name="records_count">Records</string>
+    <string name="tasks_done">Done</string>
+    <string name="tasks_open">Open</string>
+    <string name="not_recorded">Not recorded</string>
+    <string name="empty_title">Nothing here yet</string>
+    <string name="actions_available_later">Module actions appear when records exist.</string>
+    <string name="filters_available_later">Filters become available when records exist.</string>
+
+    <!-- Tasks workspace -->
+    <string name="workspace_subtitle_tasks">Capture, complete, and review what needs doing.</string>
+    <string name="filter_all">All</string>
+    <string name="filter_open">Open</string>
+    <string name="filter_done">Completed</string>
+    <string name="task_list_label">Tasks</string>
+    <string name="task_title_label">Task title</string>
+    <string name="new_task">New task</string>
+    <string name="save_action">Save</string>
+    <string name="cancel_action">Cancel</string>
+    <string name="task_status_open">Open</string>
+    <string name="task_status_done">Completed</string>
+    <string name="mark_complete">Mark complete</string>
+    <string name="mark_open">Reopen</string>
+    <string name="module_empty_tasks">No tasks yet. Tasks added here are saved on this device.</string>
+    <string name="no_tasks_in_view">No tasks in this view.</string>
+
+    <!-- Other module workspaces -->
+    <string name="workspace_subtitle_habits">Small rhythms, kept gently.</string>
+    <string name="workspace_subtitle_mascot">Your companion grows with consistent habits.</string>
+    <string name="workspace_subtitle_gym">Sessions and sets, recorded as planned.</string>
+    <string name="workspace_subtitle_food">Meals and nourishment without invented numbers.</string>
+    <string name="workspace_subtitle_cardio">Distance and pace only when measured.</string>
+    <string name="workspace_subtitle_finance">Expenses only, in whole rupees and paise.</string>
+    <string name="module_empty_habits">No habits yet. Your schedule will appear here when habits are added.</string>
+    <string name="module_empty_mascot">No growth yet. Your companion grows as habits are completed.</string>
+    <string name="module_empty_gym">No sessions logged yet.</string>
+    <string name="module_empty_food">No meals logged yet.</string>
+    <string name="module_empty_cardio">No activities recorded yet.</string>
+    <string name="module_empty_finance">No expenses recorded yet.</string>
+    <string name="schedule_label">Schedule</string>
+    <string name="day_monday">Mon</string>
+    <string name="day_tuesday">Tue</string>
+    <string name="day_wednesday">Wed</string>
+    <string name="day_thursday">Thu</string>
+    <string name="day_friday">Fri</string>
+    <string name="day_saturday">Sat</string>
+    <string name="day_sunday">Sun</string>
+    <string name="mascot_stage_label">Companion stage</string>
+    <string name="mascot_stage_note">No growth is shown until habits are recorded.</string>
+    <string name="gym_plan_label">Session plan</string>
+    <string name="gym_warmup">Warm-up</string>
+    <string name="gym_main">Main set</string>
+    <string name="gym_cooldown">Cool-down</string>
+    <string name="food_meals_label">Meals</string>
+    <string name="food_breakfast">Breakfast</string>
+    <string name="food_lunch">Lunch</string>
+    <string name="food_dinner">Dinner</string>
+    <string name="cardio_measure_label">Measurements</string>
+    <string name="cardio_distance">Distance</string>
+    <string name="cardio_duration">Duration</string>
+    <string name="cardio_sensor_note">No sensor or location data is read by this client.</string>
+    <string name="finance_ledger_label">Ledger</string>
+    <string name="finance_income">Income</string>
+    <string name="finance_expense">Expenses</string>
+    <string name="finance_net">Net</string>
+    <string name="finance_note">No account or transaction data is read by this client.</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_subtitle">Your day at a glance, kept close at hand.</string>
+    <string name="local_first_note">Local-first: this screen works with the server unreachable.</string>
+    <string name="tasks_in_local_store">Tasks in local store</string>
+    <string name="foundation_ready">Foundation</string>
+    <string name="foundation_note">Local storage, theming, and languages are in place.</string>
+    <string name="foundation_item_storage">Local storage</string>
+    <string name="foundation_item_themes">Light and dark themes</string>
+    <string name="foundation_item_languages">English and Tamil</string>
+    <string name="foundation_item_status">Offline-first operation</string>
+
+    <!-- Appearance, profile, deep links -->
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_subtitle">Colours and type follow the generated design tokens.</string>
+    <string name="appearance_android_note">This client uses the system colour mode and generated tokens. Preference editing arrives in a later phase.</string>
+    <string name="open_design_system">Open design system</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_subtitle">One personal profile for this installation.</string>
+    <string name="profile_single_title">Personal profile</string>
+    <string name="profile_single_note">My Flow uses one personal profile. Family or multi-user accounts are not part of the first release.</string>
+    <string name="profile_edit_later">Profile name and image editing arrive with settings in a later phase.</string>
+    <string name="profile_preferences">Preferences</string>
+    <string name="open_appearance">Open appearance settings</string>
+    <string name="section_deep_links">Deep links</string>
+    <string name="deeplink_app_pattern">myflow://app/{destination}</string>
+    <string name="deeplink_web_pattern">https://myflow.local/{destination}</string>
+    <string name="deeplink_note">Use a route id as the path to open a screen directly.</string>
 </resources>

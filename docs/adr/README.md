@@ -20,5 +20,6 @@
 | [0016](0016-backup-deployment.md) | Backup and deployment | Accepted | Docker Compose + Tailscale; verified encrypted backups |
 | [0017](0017-quality-gates.md) | Quality gates | Accepted | CI-enforced Definition of Done |
 | [0018](0018-appearance-preferences.md) | Appearance preference model | Accepted | Versioned local preferences + contrast-guarded custom colours |
+| [0019](0019-navigation-workspaces.md) | Navigation, deep links, and module workspaces | Accepted | Stable hash routes, read-only search projection, honest progress |
 
 All ADRs were accepted on 2026-11-22 as part of the architecture baseline. Superseding one requires a new ADR that marks the old record `Superseded` and links it here.

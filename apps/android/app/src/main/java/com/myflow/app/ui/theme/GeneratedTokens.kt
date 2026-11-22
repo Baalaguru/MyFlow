@@ -32,7 +32,7 @@ object GeneratedTokens {
     )
     )
     val primitiveColors: Map<String, String> = mapOf("parchment" to "#F3EBDD", "paper" to "#E4D7C1", "leather" to "#70563B", "sage" to "#788064", "terracotta" to "#A36F59", "ink" to "#3B332B")
-    val moduleAccents: Map<String, String> = mapOf("dashboard" to "primary", "tasks" to "primary", "habits" to "growth", "gym" to "highlight", "food" to "growth", "cardio" to "highlight", "finance" to "primary")
+    val moduleAccents: Map<String, String> = mapOf("dashboard" to "primary", "tasks" to "primary", "habits" to "growth", "mascot" to "growth", "gym" to "highlight", "food" to "growth", "cardio" to "highlight", "finance" to "primary")
     val stateRoles: Map<String, String> = mapOf("selected" to "primary", "hover" to "surfaceAlt", "focus" to "focus", "disabled" to "disabled")
     val chartPalettes: Map<String, Map<String, List<String>>> = mapOf(
     "vintageLibrary" to mapOf("light" to listOf("#70563B", "#4F5A3C", "#8E4F35", "#6B5D4D", "#A08A5C", "#5C6B73"), "dark" to listOf("#C9A47F", "#98A282", "#C08B72", "#B6A48D", "#D6BE8C", "#8FA6B0")),

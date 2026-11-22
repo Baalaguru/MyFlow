@@ -1,0 +1,261 @@
+package com.myflow.app.ui.workspaces
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.myflow.app.R
+import com.myflow.app.data.unavailableProgress
+import com.myflow.app.ui.navigation.AppDestinations
+import com.myflow.app.ui.navigation.destinationColors
+import com.myflow.app.ui.theme.GeneratedTokens
+
+/**
+ * Shared scaffolding for modules whose repositories do not exist yet. The body
+ * slot is deliberately module-specific; no placeholder records are invented.
+ */
+@Composable
+private fun EmptyModuleWorkspace(
+    routeId: String,
+    titleRes: Int,
+    subtitleRes: Int,
+    body: @Composable ColumnScope.() -> Unit,
+) {
+    val notRecorded = stringResource(R.string.not_recorded)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        ModuleHeader(
+            title = stringResource(titleRes),
+            subtitle = stringResource(subtitleRes),
+            routeId = routeId,
+        )
+        ProgressStrip(snapshot = unavailableProgress, routeId = routeId)
+        ModuleStats(records = notRecorded, done = notRecorded, open = notRecorded)
+        ModuleActions {
+            Text(
+                text = stringResource(R.string.actions_available_later),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        ModuleFilters {
+            Text(
+                text = stringResource(R.string.filters_available_later),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        body()
+    }
+}
+
+@Composable
+fun HabitsWorkspace() {
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.HABITS,
+        titleRes = R.string.nav_habits,
+        subtitleRes = R.string.workspace_subtitle_habits,
+    ) {
+        SectionCard(title = stringResource(R.string.schedule_label)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                listOf(
+                    R.string.day_monday,
+                    R.string.day_tuesday,
+                    R.string.day_wednesday,
+                    R.string.day_thursday,
+                    R.string.day_friday,
+                    R.string.day_saturday,
+                    R.string.day_sunday,
+                ).forEach { dayRes ->
+                    Text(
+                        text = stringResource(dayRes),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.module_empty_habits),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+fun MascotWorkspace() {
+    val (accent, _) = destinationColors(AppDestinations.MASCOT)
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.MASCOT,
+        titleRes = R.string.nav_mascot,
+        subtitleRes = R.string.workspace_subtitle_mascot,
+    ) {
+        SectionCard(title = stringResource(R.string.mascot_stage_label)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .clip(RoundedCornerShape(GeneratedTokens.radii.getValue("md").dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(accent),
+                )
+            }
+            Text(
+                text = stringResource(R.string.mascot_stage_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.module_empty_mascot),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+fun GymWorkspace() {
+    val notRecorded = stringResource(R.string.not_recorded)
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.GYM,
+        titleRes = R.string.nav_gym,
+        subtitleRes = R.string.workspace_subtitle_gym,
+    ) {
+        SectionCard(title = stringResource(R.string.gym_plan_label)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                PlanColumn(label = stringResource(R.string.gym_warmup), value = notRecorded, Modifier.weight(1f))
+                PlanColumn(label = stringResource(R.string.gym_main), value = notRecorded, Modifier.weight(1f))
+                PlanColumn(label = stringResource(R.string.gym_cooldown), value = notRecorded, Modifier.weight(1f))
+            }
+            Text(
+                text = stringResource(R.string.module_empty_gym),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlanColumn(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(GeneratedTokens.radii.getValue("sm").dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall)
+        Text(text = value, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+fun FoodWorkspace() {
+    val notRecorded = stringResource(R.string.not_recorded)
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.FOOD,
+        titleRes = R.string.nav_food,
+        subtitleRes = R.string.workspace_subtitle_food,
+    ) {
+        SectionCard(title = stringResource(R.string.food_meals_label)) {
+            ValueRow(label = stringResource(R.string.food_breakfast), value = notRecorded)
+            ValueRow(label = stringResource(R.string.food_lunch), value = notRecorded)
+            ValueRow(label = stringResource(R.string.food_dinner), value = notRecorded)
+            Text(
+                text = stringResource(R.string.module_empty_food),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+fun CardioWorkspace() {
+    val notRecorded = stringResource(R.string.not_recorded)
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.CARDIO,
+        titleRes = R.string.nav_cardio,
+        subtitleRes = R.string.workspace_subtitle_cardio,
+    ) {
+        SectionCard(title = stringResource(R.string.cardio_measure_label)) {
+            ValueRow(label = stringResource(R.string.cardio_distance), value = notRecorded)
+            ValueRow(label = stringResource(R.string.cardio_duration), value = notRecorded)
+            Text(
+                text = stringResource(R.string.cardio_sensor_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.module_empty_cardio),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+fun FinanceWorkspace() {
+    val notRecorded = stringResource(R.string.not_recorded)
+    EmptyModuleWorkspace(
+        routeId = AppDestinations.FINANCE,
+        titleRes = R.string.nav_finance,
+        subtitleRes = R.string.workspace_subtitle_finance,
+    ) {
+        SectionCard(title = stringResource(R.string.finance_ledger_label)) {
+            ValueRow(label = stringResource(R.string.finance_income), value = notRecorded)
+            ValueRow(label = stringResource(R.string.finance_expense), value = notRecorded)
+            ValueRow(label = stringResource(R.string.finance_net), value = notRecorded)
+            Text(
+                text = stringResource(R.string.finance_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.module_empty_finance),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
