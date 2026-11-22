@@ -7,15 +7,15 @@ interface StatusPillProps {
 export function StatusPill({ online, onlineLabel, offlineLabel }: StatusPillProps) {
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs"
-      style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+      className="inline-flex min-h-[36px] items-center gap-2 rounded-pill border px-3 py-1 text-xs"
+      style={{ borderColor: 'var(--mf-border)', color: 'var(--mf-muted)' }}
       role="status"
       aria-live="polite"
     >
       <span
         aria-hidden="true"
-        className="h-2 w-2 rounded-full"
-        style={{ backgroundColor: online ? 'var(--growth)' : 'var(--highlight)' }}
+        className="h-2 w-2 rounded-pill"
+        style={{ backgroundColor: online ? 'var(--mf-growth)' : 'var(--mf-highlight)' }}
       />
       {online ? onlineLabel : offlineLabel}
     </span>

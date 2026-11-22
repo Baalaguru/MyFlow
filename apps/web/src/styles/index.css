@@ -4,34 +4,26 @@
 @import '@fontsource/cormorant-garamond/latin-600.css';
 @import '@fontsource/libre-baskerville/latin-400.css';
 @import '@fontsource/libre-baskerville/latin-700.css';
+@import '@fontsource/lora/latin-400.css';
+@import '@fontsource/lora/latin-400-italic.css';
+@import '@fontsource/lora/latin-500.css';
 @import '@fontsource/nunito-sans/latin-400.css';
 @import '@fontsource/nunito-sans/latin-600.css';
 @import '@fontsource/nunito-sans/latin-700.css';
+@import '../generated/tokens.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg: #f3ebdd;
-  --surface: #e4d7c1;
-  --accent: #70563b;
-  --growth: #788064;
-  --highlight: #a36f59;
-  --text: #3b332b;
-  --border: rgba(112, 86, 59, 0.28);
-  --muted: rgba(59, 51, 43, 0.64);
+  --mf-onWidget: var(--mf-text);
+  --mf-onPanel: var(--mf-text);
+  color-scheme: light;
 }
 
-[data-theme='dark'] {
-  --bg: #241e1a;
-  --surface: #302821;
-  --accent: #a98a6b;
-  --growth: #98a282;
-  --highlight: #c08b72;
-  --text: #f0e4d0;
-  --border: rgba(240, 228, 208, 0.16);
-  --muted: rgba(240, 228, 208, 0.64);
+:root[data-mode='dark'] {
+  color-scheme: dark;
 }
 
 @layer base {
@@ -42,55 +34,149 @@
   }
 
   body {
-    background-color: var(--bg);
+    background-color: var(--mf-background);
     background-image: radial-gradient(rgba(112, 86, 59, 0.035) 1px, transparent 1px);
     background-size: 18px 18px;
-    color: var(--text);
-    font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
+    color: var(--mf-text);
+    font-family: var(--mf-active-font-body);
+    font-size: calc(var(--mf-fs-base) * var(--mf-font-scale));
+    line-height: var(--mf-body-line-height);
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
+  h3,
+  h4 {
+    font-family: var(--mf-active-font-heading);
+    font-weight: var(--mf-weight-regular);
+    line-height: 1.25;
+    font-size: calc(1em * var(--mf-heading-scale));
+  }
+
+  h1 {
+    font-size: calc(var(--mf-fs-4xl) * var(--mf-font-scale) * var(--mf-heading-scale));
+  }
+
+  h2 {
+    font-size: calc(var(--mf-fs-2xl) * var(--mf-font-scale) * var(--mf-heading-scale));
+  }
+
   h3 {
-    font-family: 'Libre Baskerville', Georgia, serif;
-    font-weight: 400;
+    font-size: calc(var(--mf-fs-xl) * var(--mf-font-scale) * var(--mf-heading-scale));
+  }
+
+  p {
+    max-width: 68ch;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 
   :focus-visible {
-    outline: 2px solid var(--highlight);
+    outline: 2px solid var(--mf-focus);
     outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--mf-highlight);
+    color: var(--mf-onHighlight);
   }
 }
 
 @layer components {
   .panel {
     @apply rounded-xl border shadow-paper;
-    background-color: var(--surface);
-    border-color: var(--border);
+    background-color: var(--mf-panel);
+    color: var(--mf-onPanel);
+    border-color: var(--mf-border);
+  }
+
+  .widget-surface {
+    background-color: var(--mf-widgetBackground);
+    color: var(--mf-onWidget);
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors;
   }
 
   .btn-primary {
-    background-color: var(--accent);
-    color: #fbf5e9;
+    background-color: var(--mf-primary);
+    color: var(--mf-onPrimary);
+  }
+
+  .btn-secondary {
+    background-color: var(--mf-growth);
+    color: var(--mf-onGrowth);
   }
 
   .btn-ghost {
     @apply border;
-    border-color: var(--border);
-    color: var(--text);
+    border-color: var(--mf-border);
+    color: var(--mf-text);
+    background-color: transparent;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    background-color: var(--mf-disabled);
+    color: var(--mf-text);
+    cursor: not-allowed;
+    opacity: 0.75;
   }
 
   .muted {
-    color: var(--muted);
+    color: var(--mf-muted);
   }
 
   .eyebrow {
-    @apply text-xs uppercase tracking-[0.18em];
-    color: var(--muted);
+    @apply uppercase;
+    font-size: calc(var(--mf-fs-xs) * var(--mf-font-scale));
+    letter-spacing: var(--mf-tracking-eyebrow);
+    color: var(--mf-muted);
+  }
+
+  .serif-quote {
+    font-family: var(--mf-font-journal);
+    font-style: italic;
+    font-size: calc(var(--mf-fs-lg) * var(--mf-font-scale));
+  }
+
+  .stat-number {
+    font-family: var(--mf-active-font-statistics);
+    font-size: calc(var(--mf-fs-4xl) * var(--mf-font-scale));
+    font-variant-numeric: tabular-nums;
+    color: var(--mf-text);
+  }
+
+  .field {
+    @apply w-full rounded-lg border px-3 py-2 text-sm;
+    min-height: 44px;
+    background-color: var(--mf-surface);
+    color: var(--mf-text);
+    border-color: var(--mf-border);
+  }
+
+  .field::placeholder {
+    color: var(--mf-muted);
+  }
+
+  .field:disabled {
+    background-color: var(--mf-disabled);
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -15,7 +15,7 @@ All six colors are available throughout the application.
 | `terracotta` | `#A36F59` | Highlights |
 | `ink` | `#3B332B` | Text and dark surfaces |
 
-Semantic roles (`background`, `surface`, `primary`, `accent-growth`, `accent-highlight`, `text`, `border`, `success`, `warning`, `danger`, `disabled`, `focus`) map to primitives per theme and preset, so customization changes roles without breaking contrast.
+Semantic roles (`background`, `surface`, `surfaceAlt`, `primary`, `onPrimary`, `growth`, `onGrowth`, `highlight`, `onHighlight`, `text`, `muted`, `border`, `success`, `warning`, `danger`, `disabled`, `focus`, `widgetBackground`, `panel`) map to primitives per theme and preset, so customization changes roles without breaking contrast.
 
 ## 2. Light and dark
 
@@ -69,7 +69,15 @@ contracts/tokens/tokens.json  (source of truth)
         └── generated Kotlin constants / Compose theme → Android
 ```
 
-Tokens include colors, semantic role mappings, typography scale, spacing, radii, elevation, motion durations, and chart palettes. Generated files are committed and checked by CI; hand-editing generated output is prohibited.
+Tokens include colors, semantic role mappings, module accents, interaction-state roles, typography families and preferences, spacing, radii, elevation, motion durations, and chart palettes. `scripts/generate-tokens.mjs` writes the committed web CSS/TypeScript and Kotlin artifacts; `node scripts/generate-tokens.mjs --check` fails when they are stale, and `scripts/validate-contracts.mjs` also checks i18n parity and contrast. Hand-editing generated output is prohibited.
+
+## 8. Phase 3 implementation status
+
+- Web: all shared components are implemented in `apps/web/src/components/ui/` and exercised on the Design system screen. Status pills, sync indicators, quick capture, breadcrumbs, search, mobile navigation, dialogs, bottom sheets, toasts, tooltips, progress, tables, charts, and responsive cards use token variables only.
+- Appearance: `apps/web/src/lib/appearance.ts` persists a versioned local preference object, validates stored values, applies typography selectors and multipliers, and rejects unreadable custom colours. Restoring defaults clears overrides without touching records. See [ADR-0018](../adr/0018-appearance-preferences.md).
+- Strings: every user-facing web string resolves from `contracts/i18n/en.json` or `ta.json`; both bundles are checked for parity.
+- Android: a Compose wrapper maps generated tokens to Material 3 colours and typography, and a parity screen demonstrates primitives, semantic roles, and type samples. Android strings and Tamil translations are resource-backed. No Android runtime pass is claimed; see the Phase 3 report for the device gate status.
+- Charts: the reusable bar graph uses the selected preset and mode palette and an accessible description; no module chart is shown without module data.
 
 ## 7. Visual rules
 

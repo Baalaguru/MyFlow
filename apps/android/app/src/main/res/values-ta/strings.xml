@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">என் ஓட்டம்</string>
+
+    <string name="status_phase3">கட்டம் 3 இணக்கம்: டோக்கன் அடிப்படையிலான நிறத் தொகுப்பும் எழுத்துருக்களும்.</string>
+
+    <string name="section_primitives">அடிப்படை நிறங்கள்</string>
+    <string name="section_semantic_roles">பொருள் நிறங்கள்</string>
+    <string name="section_typography">எழுத்துரு மாதிரிகள்</string>
+
+    <string name="color_parchment">பழைய காகிதம்</string>
+    <string name="color_paper">காகிதம்</string>
+    <string name="color_leather">தோல்</string>
+    <string name="color_sage">மூலிகை பச்சை</string>
+    <string name="color_terracotta">மண் சிவப்பு</string>
+    <string name="color_ink">மை</string>
+    <string name="color_custom">தனிப்பயன்</string>
+
+    <string name="role_background">பின்னணி</string>
+    <string name="role_surface">மேற்பரப்பு</string>
+    <string name="role_surface_alt">மாற்று மேற்பரப்பு</string>
+    <string name="role_primary">முதன்மை</string>
+    <string name="role_growth">வளர்ச்சி</string>
+    <string name="role_highlight">சிறப்பம்சம்</string>
+    <string name="role_text">உரை</string>
+    <string name="role_muted">மங்கியது</string>
+    <string name="role_border">எல்லை</string>
+    <string name="role_success">வெற்றி</string>
+    <string name="role_warning">எச்சரிக்கை</string>
+    <string name="role_danger">அபாயம்</string>
+    <string name="role_disabled">முடக்கப்பட்டது</string>
+    <string name="role_focus">கவனம்</string>
+    <string name="role_widget_background">விட்ஜெட் பின்னணி</string>
+    <string name="role_panel">பலகை</string>
+
+    <string name="label_app_title">பயன்பாட்டு தலைப்பு</string>
+    <string name="label_heading">தலைப்பு</string>
+    <string name="label_section">பிரிவு</string>
+    <string name="label_body">உரை</string>
+    <string name="label_statistics">புள்ளிவிவரங்கள்</string>
+
+    <string name="sample_heading">நிலையான பழக்கங்களுக்கு அமைதியான இடம்</string>
+    <string name="sample_section">இன்றைய கவனம்</string>
+    <string name="sample_body">அனைத்தும் இணையமின்றி இயங்கும், எனவே உங்கள் குறிப்புகள் உங்களிடமே இருக்கும்.</string>
+    <string name="sample_statistics">12 / 18</string>
+
+    <string name="widget_status">மாதிரித் தரவு எதுவும் காட்டப்படவில்லை</string>
+</resources>

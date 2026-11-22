@@ -19,5 +19,6 @@
 | [0015](0015-authentication-encryption.md) | Authentication and encryption | Accepted | Argon2id + tokens; envelope encryption; OS biometrics only |
 | [0016](0016-backup-deployment.md) | Backup and deployment | Accepted | Docker Compose + Tailscale; verified encrypted backups |
 | [0017](0017-quality-gates.md) | Quality gates | Accepted | CI-enforced Definition of Done |
+| [0018](0018-appearance-preferences.md) | Appearance preference model | Accepted | Versioned local preferences + contrast-guarded custom colours |
 
 All ADRs were accepted on 2026-11-22 as part of the architecture baseline. Superseding one requires a new ADR that marks the old record `Superseded` and links it here.

@@ -36,6 +36,30 @@ function Invoke-Check {
   }
 }
 
+function Invoke-ExpectedNotFound {
+  param([string]$Url)
+  $raw = & curl.exe -sS -i -L --max-time $TimeoutSeconds $Url 2>$null
+  $joined = [string]::Join("`n", [string[]]$raw)
+  $statusLine = @($raw | Where-Object { $_ -match '^HTTP/\S+\s+\d+' } | Select-Object -Last 1)[0]
+  $status = 0
+  if ($statusLine -match 'HTTP/\S+\s+(\d+)') {
+    $status = [int]$Matches[1]
+  }
+  return [pscustomobject]@{ Status = $status; Body = $joined }
+}
+
+# --- Contracts --------------------------------------------------------------
+try {
+  $contractOutput = & node (Join-Path $PSScriptRoot 'validate-contracts.mjs') 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    Add-Result 'Contracts' 'PASS' ([string]$contractOutput).Trim()
+  } else {
+    Add-Result 'Contracts' 'FAIL' ([string]$contractOutput).Trim()
+  }
+} catch {
+  Add-Result 'Contracts' 'FAIL' "Contract validation could not run: $($_.Exception.Message)"
+}
+
 # --- Server -----------------------------------------------------------------
 $health = Invoke-Check "$ApiUrl/healthz"
 $versioned = Invoke-Check "$ApiUrl/v1/health"
@@ -43,6 +67,13 @@ if ($health -and $versioned -and $health.status -eq 'ok' -and $versioned.status 
   Add-Result 'Server /healthz + /v1/health' 'PASS' "status=$($health.status) database=$($health.database) version=$($health.version) time=$($health.time)"
 } else {
   Add-Result 'Server /healthz + /v1/health' 'FAIL' 'Health endpoints did not both return status=ok'
+}
+
+$notFound = Invoke-ExpectedNotFound "$ApiUrl/v1"
+if ($notFound.Status -eq 404 -and $notFound.Body -match '"code"\s*:\s*"not_found"') {
+  Add-Result 'Server /v1 envelope' 'PASS' "HTTP $($notFound.Status), JSON not_found envelope returned"
+} else {
+  Add-Result 'Server /v1 envelope' 'FAIL' "Unexpected /v1 response: HTTP $($notFound.Status)"
 }
 
 $migrationCheck = $null

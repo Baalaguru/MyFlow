@@ -1,4 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">My Flow</string>
+
+    <string name="status_phase3">Phase 3 parity: token-driven palette and typography.</string>
+
+    <string name="section_primitives">Primitive palette</string>
+    <string name="section_semantic_roles">Semantic roles</string>
+    <string name="section_typography">Typography</string>
+
+    <string name="color_parchment">Parchment</string>
+    <string name="color_paper">Paper</string>
+    <string name="color_leather">Leather</string>
+    <string name="color_sage">Sage</string>
+    <string name="color_terracotta">Terracotta</string>
+    <string name="color_ink">Ink</string>
+    <string name="color_custom">Custom</string>
+
+    <string name="role_background">Background</string>
+    <string name="role_surface">Surface</string>
+    <string name="role_surface_alt">Surface alt</string>
+    <string name="role_primary">Primary</string>
+    <string name="role_growth">Growth</string>
+    <string name="role_highlight">Highlight</string>
+    <string name="role_text">Text</string>
+    <string name="role_muted">Muted</string>
+    <string name="role_border">Border</string>
+    <string name="role_success">Success</string>
+    <string name="role_warning">Warning</string>
+    <string name="role_danger">Danger</string>
+    <string name="role_disabled">Disabled</string>
+    <string name="role_focus">Focus</string>
+    <string name="role_widget_background">Widget background</string>
+    <string name="role_panel">Panel</string>
+
+    <string name="label_app_title">App title</string>
+    <string name="label_heading">Heading</string>
+    <string name="label_section">Section</string>
+    <string name="label_body">Body</string>
+    <string name="label_statistics">Statistics</string>
+
+    <string name="sample_heading">A calm place for steady habits</string>
+    <string name="sample_section">Today\'s focus</string>
+    <string name="sample_body">Everything works offline, so your notes stay with you.</string>
+    <string name="sample_statistics">12 / 18</string>
+
+    <string name="widget_status">No sample data shown</string>
 </resources>
