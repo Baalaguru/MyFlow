@@ -40,6 +40,7 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
   const [exerciseName, setExerciseName] = useState('')
   const [exerciseMuscle, setExerciseMuscle] = useState<ExerciseRecord['muscleGroup']>('chest')
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [setDrafts, setSetDrafts] = useState<Record<string, { reps: string; weight: string }>>({})
 
   const load = useCallback(async () => {
     try {
@@ -211,9 +212,16 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
                               className="field min-h-[32px] px-2 py-1 text-sm w-full"
                               type="number"
                               min={0}
-                              value={set.reps}
+                              value={setDrafts[set.id]?.reps ?? String(set.reps)}
                               aria-label={`${t('gymReps')} ${set.setNumber}`}
-                              onChange={(e) => void mutate(() => updateSet(workout.id, ex.id, set.id, { reps: Number(e.target.value) }), 'gymSetUpdated')}
+                              onChange={(e) => setSetDrafts((prev) => ({ ...prev, [set.id]: { reps: e.target.value, weight: prev[set.id]?.weight ?? String(set.weight) } }))}
+                              onBlur={() => {
+                                const raw = setDrafts[set.id]?.reps
+                                if (raw === undefined) return
+                                const reps = raw === '' ? 0 : Math.max(0, Math.round(Number(raw)))
+                                setSetDrafts((prev) => ({ ...prev, [set.id]: { reps: String(reps), weight: prev[set.id]?.weight ?? String(set.weight) } }))
+                                if (reps !== set.reps) void mutate(() => updateSet(workout.id, ex.id, set.id, { reps }), 'gymSetUpdated')
+                              }}
                             />
                           </label>
                           <label className="flex items-center gap-1">
@@ -223,9 +231,16 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
                               type="number"
                               min={0}
                               step="0.5"
-                              value={set.weight}
+                              value={setDrafts[set.id]?.weight ?? String(set.weight)}
                               aria-label={`${t('gymWeight')} ${set.setNumber}`}
-                              onChange={(e) => void mutate(() => updateSet(workout.id, ex.id, set.id, { weight: Number(e.target.value) }), 'gymSetUpdated')}
+                              onChange={(e) => setSetDrafts((prev) => ({ ...prev, [set.id]: { reps: prev[set.id]?.reps ?? String(set.reps), weight: e.target.value } }))}
+                              onBlur={() => {
+                                const raw = setDrafts[set.id]?.weight
+                                if (raw === undefined) return
+                                const weight = raw === '' ? 0 : Math.max(0, Number(raw))
+                                setSetDrafts((prev) => ({ ...prev, [set.id]: { reps: prev[set.id]?.reps ?? String(set.reps), weight: String(weight) } }))
+                                if (weight !== set.weight) void mutate(() => updateSet(workout.id, ex.id, set.id, { weight }), 'gymSetUpdated')
+                              }}
                             />
                           </label>
                           <label className="flex items-center gap-1 text-xs">
@@ -233,7 +248,12 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
                               type="checkbox"
                               checked={set.completed}
                               aria-label={`${t('gymCompleteSet')} ${set.setNumber}`}
-                              onChange={(e) => void mutate(() => updateSet(workout.id, ex.id, set.id, { completed: e.target.checked }), 'gymSetUpdated')}
+                              onChange={(e) => {
+                                const draft = setDrafts[set.id]
+                                const reps = draft?.reps === undefined ? undefined : Math.max(0, Math.round(Number(draft.reps || 0)))
+                                const weight = draft?.weight === undefined ? undefined : Math.max(0, Number(draft.weight || 0))
+                                void mutate(() => updateSet(workout.id, ex.id, set.id, { reps, weight, completed: e.target.checked }), 'gymSetUpdated')
+                              }}
                             />
                             {t('gymDone')}
                           </label>
