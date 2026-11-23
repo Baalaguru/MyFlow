@@ -14,6 +14,7 @@ import {
 import { moduleRouteIds, type RouteId } from './lib/routes'
 import { DashboardPage } from './pages/DashboardPage'
 import { EmptyModuleWorkspace, type EmptyModuleRoute } from './pages/ModuleWorkspaces'
+import { GymWorkspace } from './pages/GymWorkspace'
 import { HabitsWorkspace } from './pages/HabitsWorkspace'
 import { MascotWorkspace } from './pages/MascotWorkspace'
 import { ProfilePage } from './pages/ProfilePage'
@@ -26,7 +27,9 @@ const DesignSystemPage = lazy(() =>
   import('./pages/DesignSystemPage').then((module) => ({ default: module.DesignSystemPage })),
 )
 
-const emptyModuleRoutes = moduleRouteIds.filter((route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot') as EmptyModuleRoute[]
+const emptyModuleRoutes = moduleRouteIds.filter(
+  (route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot' && route !== 'gym',
+) as EmptyModuleRoute[]
 
 function isEmptyModuleRoute(route: RouteId): route is EmptyModuleRoute {
   return (emptyModuleRoutes as readonly RouteId[]).includes(route)
@@ -97,6 +100,16 @@ export default function App() {
     }
     if (route === 'mascot') {
       return <MascotWorkspace t={t} revision={captureRevision} />
+    }
+    if (route === 'gym') {
+      return (
+        <GymWorkspace
+          t={t}
+          appearance={appearance}
+          revision={captureRevision}
+          onSaved={() => setCaptureRevision((value) => value + 1)}
+        />
+      )
     }
     if (isEmptyModuleRoute(route)) return <EmptyModuleWorkspace route={route} t={t} />
     if (route === 'profile') return <ProfilePage t={t} onNavigate={navigate} />

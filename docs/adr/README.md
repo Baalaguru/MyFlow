@@ -24,5 +24,6 @@
 | [0020](0020-dashboard-system.md) | Dashboard system and widget contract | Accepted | Local dashboard records, stable widget IDs, honest empty states, sync deferred |
 | [0021](0021-task-management.md) | To-Do task model, views, and recurrence | Accepted | Four priorities, subtasks, scheduled-only denominator, append-only recurrence, reminders deferred |
 | [0022](0022-habit-tracking-mascot.md) | Habit tracking, streaks, and mascot progression | Accepted | Local schedules/logs, skip/rest-safe streaks, recompute from history, mascot never punitive, reminder delivery deferred |
+| [0023](0023-gym-workouts-and-sets.md) | Gym workouts, sets, and personal records | Accepted | Per-set rows, completed-only volume, PR/overload rules, real gym widget, Android static parity |
 
 All ADRs were accepted on 2026-11-22 as part of the architecture baseline. Superseding one requires a new ADR that marks the old record `Superseded` and links it here.

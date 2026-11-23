@@ -122,6 +122,54 @@ data class MascotStateEntity(
     val updatedAt: String,
 )
 
+@Entity(tableName = "gym_exercises")
+data class GymExerciseEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val muscleGroup: String,
+    val notes: String = "",
+    val isCustom: Boolean = false,
+    val createdAt: String,
+)
+
+@Entity(tableName = "gym_workouts")
+data class GymWorkoutEntity(
+    @PrimaryKey val id: String,
+    val startedAt: String,
+    val endedAt: String? = null,
+    val note: String = "",
+)
+
+@Entity(tableName = "gym_workout_exercises")
+data class GymWorkoutExerciseEntity(
+    @PrimaryKey val id: String,
+    val workoutId: String,
+    val exerciseId: String,
+    val sortOrder: Int,
+)
+
+@Entity(tableName = "gym_sets")
+data class GymSetEntity(
+    @PrimaryKey val id: String,
+    val workoutExerciseId: String,
+    val setNumber: Int,
+    val reps: Int,
+    val weight: Double,
+    val completed: Boolean,
+    val completedAt: String? = null,
+)
+
+@Entity(tableName = "gym_personal_records")
+data class GymPersonalRecordEntity(
+    @PrimaryKey val id: String,
+    val exerciseId: String,
+    val metric: String,
+    val value: Double,
+    val achievedAt: String,
+    val workoutId: String,
+    val setId: String,
+)
+
 @Dao
 interface DashboardDao {
     @Query("SELECT * FROM dashboards ORDER BY sortOrder ASC, createdAt ASC")
@@ -198,6 +246,75 @@ interface HabitDao {
 
     @Upsert
     suspend fun saveMascot(state: MascotStateEntity)
+}
+
+@Dao
+interface GymDao {
+    @Query("SELECT * FROM gym_exercises ORDER BY name ASC")
+    fun observeExercises(): Flow<List<GymExerciseEntity>>
+
+    @Query("SELECT * FROM gym_exercises ORDER BY name ASC")
+    suspend fun exercises(): List<GymExerciseEntity>
+
+    @Upsert
+    suspend fun saveExercise(exercise: GymExerciseEntity)
+
+    @Query("SELECT * FROM gym_workouts ORDER BY startedAt DESC")
+    fun observeWorkouts(): Flow<List<GymWorkoutEntity>>
+
+    @Query("SELECT * FROM gym_workouts ORDER BY startedAt DESC")
+    suspend fun workouts(): List<GymWorkoutEntity>
+
+    @Query("SELECT * FROM gym_workouts WHERE id = :id")
+    suspend fun workout(id: String): GymWorkoutEntity?
+
+    @Upsert
+    suspend fun saveWorkout(workout: GymWorkoutEntity)
+
+    @Query("DELETE FROM gym_workouts WHERE id = :id")
+    suspend fun deleteWorkout(id: String)
+
+    @Query("SELECT * FROM gym_workout_exercises WHERE workoutId = :workoutId ORDER BY sortOrder ASC")
+    suspend fun workoutExercises(workoutId: String): List<GymWorkoutExerciseEntity>
+
+    @Query("SELECT * FROM gym_workout_exercises ORDER BY sortOrder ASC")
+    suspend fun allWorkoutExercises(): List<GymWorkoutExerciseEntity>
+
+    @Upsert
+    suspend fun saveWorkoutExercise(exercise: GymWorkoutExerciseEntity)
+
+    @Query("DELETE FROM gym_workout_exercises WHERE id = :id")
+    suspend fun deleteWorkoutExercise(id: String)
+
+    @Query("DELETE FROM gym_workout_exercises WHERE workoutId = :workoutId")
+    suspend fun deleteWorkoutExercises(workoutId: String)
+
+    @Query("SELECT * FROM gym_sets WHERE workoutExerciseId = :workoutExerciseId ORDER BY setNumber ASC")
+    suspend fun sets(workoutExerciseId: String): List<GymSetEntity>
+
+    @Query("SELECT * FROM gym_sets ORDER BY setNumber ASC")
+    suspend fun allSets(): List<GymSetEntity>
+
+    @Upsert
+    suspend fun saveSet(set: GymSetEntity)
+
+    @Query("DELETE FROM gym_sets WHERE id = :id")
+    suspend fun deleteSet(id: String)
+
+    @Query("DELETE FROM gym_sets WHERE workoutExerciseId = :workoutExerciseId")
+    suspend fun deleteSets(workoutExerciseId: String)
+
+    @Query("SELECT * FROM gym_personal_records ORDER BY achievedAt DESC")
+    fun observePersonalRecords(): Flow<List<GymPersonalRecordEntity>>
+
+    @Query("SELECT * FROM gym_personal_records ORDER BY achievedAt DESC")
+    suspend fun personalRecords(): List<GymPersonalRecordEntity>
+
+    @Upsert
+    suspend fun savePersonalRecord(record: GymPersonalRecordEntity)
+
+    @Query("DELETE FROM gym_personal_records")
+    suspend fun clearPersonalRecords()
 }
 
 /**
@@ -283,9 +400,51 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
+/** Adds gym tables. Existing tables and rows are untouched. */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `gym_exercises` (" +
+                "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `muscleGroup` TEXT NOT NULL, " +
+                "`notes` TEXT NOT NULL DEFAULT '', `isCustom` INTEGER NOT NULL DEFAULT 0, " +
+                "`createdAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `gym_workouts` (" +
+                "`id` TEXT NOT NULL, `startedAt` TEXT NOT NULL, `endedAt` TEXT, " +
+                "`note` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `gym_workout_exercises` (" +
+                "`id` TEXT NOT NULL, `workoutId` TEXT NOT NULL, `exerciseId` TEXT NOT NULL, " +
+                "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_gym_workout_exercises_workoutId` ON `gym_workout_exercises` (`workoutId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `gym_sets` (" +
+                "`id` TEXT NOT NULL, `workoutExerciseId` TEXT NOT NULL, `setNumber` INTEGER NOT NULL, " +
+                "`reps` INTEGER NOT NULL, `weight` REAL NOT NULL, `completed` INTEGER NOT NULL, " +
+                "`completedAt` TEXT, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_gym_sets_workoutExerciseId` ON `gym_sets` (`workoutExerciseId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `gym_personal_records` (" +
+                "`id` TEXT NOT NULL, `exerciseId` TEXT NOT NULL, `metric` TEXT NOT NULL, " +
+                "`value` REAL NOT NULL, `achievedAt` TEXT NOT NULL, `workoutId` TEXT NOT NULL, " +
+                "`setId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_gym_personal_records_exerciseId_metric` ON `gym_personal_records` (`exerciseId`, `metric`)")
+    }
+}
+
 @Database(
-    entities = [SettingEntity::class, TaskEntity::class, DashboardEntity::class, HabitEntity::class, HabitLogEntity::class, MascotStateEntity::class],
-    version = 5,
+    entities = [
+        SettingEntity::class, TaskEntity::class, DashboardEntity::class,
+        HabitEntity::class, HabitLogEntity::class, MascotStateEntity::class,
+        GymExerciseEntity::class, GymWorkoutEntity::class, GymWorkoutExerciseEntity::class,
+        GymSetEntity::class, GymPersonalRecordEntity::class,
+    ],
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(TaskJsonConverters::class)
@@ -294,6 +453,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun dashboardDao(): DashboardDao
     abstract fun habitDao(): HabitDao
+    abstract fun gymDao(): GymDao
 
     companion object {
         @Volatile
@@ -306,7 +466,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "myflow.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build().also { instance = it }
             }
     }

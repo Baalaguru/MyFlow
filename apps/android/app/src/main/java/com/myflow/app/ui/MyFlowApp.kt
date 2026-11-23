@@ -56,6 +56,8 @@ import com.myflow.app.R
 import com.myflow.app.data.AppDatabase
 import com.myflow.app.data.DashboardLabels
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.GymRepository
+import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.SearchResult
 import com.myflow.app.data.TaskRepository
 import com.myflow.app.ui.navigation.AppDestinations
@@ -107,6 +109,12 @@ fun MyFlowApp(startIntent: Intent? = null) {
             DashboardLabels(defaultDashboardName, newDashboardName, dashboardCopyName),
         )
     }
+    val habitRepository = remember(context.applicationContext) {
+        HabitRepository(AppDatabase.get(context.applicationContext).habitDao())
+    }
+    val gymRepository = remember(context.applicationContext) {
+        GymRepository(AppDatabase.get(context.applicationContext).gymDao())
+    }
     val darkMode = isSystemInDarkTheme()
     val presetId = GeneratedTokens.presetIds.first()
     val fontPreference = GeneratedTokens.fontPreferenceIds.first()
@@ -122,7 +130,9 @@ fun MyFlowApp(startIntent: Intent? = null) {
         ) {
             AppShell(
                 repository = repository,
+                dashboardRepository = dashboardRepository,
                 habitRepository = habitRepository,
+                gymRepository = gymRepository,
                 startIntent = startIntent,
             )
         }
@@ -130,7 +140,13 @@ fun MyFlowApp(startIntent: Intent? = null) {
 }
 
 @Composable
-private fun AppShell(repository: TaskRepository, habitRepository: HabitRepository, startIntent: Intent?) {
+private fun AppShell(
+    repository: TaskRepository,
+    dashboardRepository: DashboardRepository,
+    habitRepository: HabitRepository,
+    gymRepository: GymRepository,
+    startIntent: Intent?,
+) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -321,6 +337,7 @@ private fun AppShell(repository: TaskRepository, habitRepository: HabitRepositor
                 repository = repository,
                 dashboards = dashboardRepository,
                 habits = habitRepository,
+                gym = gymRepository,
                 modifier = Modifier.padding(padding),
             )
         }

@@ -84,6 +84,53 @@ export interface MascotStateRecord {
   updatedAt: string
 }
 
+export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'fullBody' | 'other'
+
+export interface ExerciseRecord {
+  id: string
+  name: string
+  muscleGroup: MuscleGroup
+  notes?: string
+  isCustom: boolean
+  createdAt: string
+}
+
+export interface WorkoutSetRecord {
+  id: string
+  workoutExerciseId: string
+  setNumber: number
+  reps: number
+  weight: number
+  completed: boolean
+  completedAt?: string
+}
+
+export interface WorkoutExerciseRecord {
+  id: string
+  workoutId: string
+  exerciseId: string
+  order: number
+  sets: WorkoutSetRecord[]
+}
+
+export interface WorkoutRecord {
+  id: string
+  startedAt: string
+  endedAt?: string
+  note?: string
+  exercises: WorkoutExerciseRecord[]
+}
+
+export interface PersonalRecordRecord {
+  id: string
+  exerciseId: string
+  metric: 'maxWeight' | 'maxVolume' | 'maxReps'
+  value: number
+  achievedAt: string
+  workoutId: string
+  setId: string
+}
+
 export interface WidgetConfig {
   id: WidgetId
   columns: number
@@ -109,6 +156,9 @@ class MyFlowDatabase extends Dexie {
   habits!: Table<HabitRecord, string>
   habitLogs!: Table<HabitLogRecord, string>
   mascotState!: Table<MascotStateRecord, string>
+  exercises!: Table<ExerciseRecord, string>
+  workouts!: Table<WorkoutRecord, string>
+  personalRecords!: Table<PersonalRecordRecord, string>
 
   constructor() {
     super('myflow')
@@ -133,6 +183,17 @@ class MyFlowDatabase extends Dexie {
       habits: 'id, paused, archived, createdAt',
       habitLogs: 'id, habitId, localDate, [habitId+localDate], status',
       mascotState: 'id',
+    })
+    this.version(5).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
+      dashboards: 'id, order, isDefault',
+      habits: 'id, paused, archived, createdAt',
+      habitLogs: 'id, habitId, localDate, [habitId+localDate], status',
+      mascotState: 'id',
+      exercises: 'id, name, muscleGroup, isCustom, createdAt',
+      workouts: 'id, startedAt, endedAt',
+      personalRecords: 'id, exerciseId, metric, achievedAt, [exerciseId+metric]',
     })
   }
 }

@@ -73,33 +73,7 @@ private fun EmptyModuleWorkspace(
     }
 }
 
-// HabitsWorkspace and MascotWorkspace are implemented in dedicated files.
-
-@Composable
-fun GymWorkspace() {
-    val notRecorded = stringResource(R.string.not_recorded)
-    EmptyModuleWorkspace(
-        routeId = AppDestinations.GYM,
-        titleRes = R.string.nav_gym,
-        subtitleRes = R.string.workspace_subtitle_gym,
-    ) {
-        SectionCard(title = stringResource(R.string.gym_plan_label)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                PlanColumn(label = stringResource(R.string.gym_warmup), value = notRecorded, Modifier.weight(1f))
-                PlanColumn(label = stringResource(R.string.gym_main), value = notRecorded, Modifier.weight(1f))
-                PlanColumn(label = stringResource(R.string.gym_cooldown), value = notRecorded, Modifier.weight(1f))
-            }
-            Text(
-                text = stringResource(R.string.module_empty_gym),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
+// HabitsWorkspace, MascotWorkspace, and GymWorkspace are implemented in dedicated files.
 
 @Composable
 private fun PlanColumn(label: String, value: String, modifier: Modifier = Modifier) {

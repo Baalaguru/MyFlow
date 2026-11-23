@@ -7,6 +7,7 @@ import androidx.navigation.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.GymRepository
 import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.TaskRepository
 import com.myflow.app.ui.AppearanceScreen
@@ -28,6 +29,7 @@ fun AppNavHost(
     repository: TaskRepository,
     dashboards: DashboardRepository,
     habits: HabitRepository,
+    gym: GymRepository,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -48,11 +50,11 @@ fun AppNavHost(
                 ),
             ) {
                 when (destination.id) {
-                    AppDestinations.DASHBOARD -> DashboardScreen(repository, dashboards, habits)
+                    AppDestinations.DASHBOARD -> DashboardScreen(repository, dashboards, habits, gym)
                     AppDestinations.TASKS -> TasksWorkspace(repository)
                     AppDestinations.HABITS -> HabitsWorkspace(habits)
                     AppDestinations.MASCOT -> MascotWorkspace(habits)
-                    AppDestinations.GYM -> GymWorkspace()
+                    AppDestinations.GYM -> GymWorkspace(gym)
                     AppDestinations.FOOD -> FoodWorkspace()
                     AppDestinations.CARDIO -> CardioWorkspace()
                     AppDestinations.FINANCE -> FinanceWorkspace()

@@ -37,7 +37,7 @@ export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   habitOverview: { id: 'habitOverview', nameKey: 'widgetHabits', noteKey: 'widgetNoteHabits', available: true, columns: 4, rows: 1 },
   currentStreak: { id: 'currentStreak', nameKey: 'widgetStreak', noteKey: 'widgetNoteStreak', available: true, columns: 4, rows: 1 },
   mascotGrowth: { id: 'mascotGrowth', nameKey: 'widgetMascot', noteKey: 'widgetNoteMascot', available: true, columns: 4, rows: 1 },
-  gymOverview: { id: 'gymOverview', nameKey: 'widgetGym', noteKey: 'widgetNoteGym', available: false, columns: 4, rows: 1 },
+  gymOverview: { id: 'gymOverview', nameKey: 'widgetGym', noteKey: 'widgetNoteGym', available: true, columns: 4, rows: 1 },
   walkingOverview: { id: 'walkingOverview', nameKey: 'widgetWalking', noteKey: 'widgetNoteWalking', available: false, columns: 4, rows: 1 },
   jumpRopeOverview: { id: 'jumpRopeOverview', nameKey: 'widgetJumpRope', noteKey: 'widgetNoteJumpRope', available: false, columns: 4, rows: 1 },
   cyclingOverview: { id: 'cyclingOverview', nameKey: 'widgetCycling', noteKey: 'widgetNoteCycling', available: false, columns: 4, rows: 1 },

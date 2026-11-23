@@ -32,8 +32,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.myflow.app.R
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.GymRepository
 import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.TaskRepository
+import com.myflow.app.data.gymSummary
+import com.myflow.app.data.derivePersonalRecords
+import com.myflow.app.data.WorkoutAggregate
+import com.myflow.app.data.WorkoutExerciseWithSets
 import com.myflow.app.data.WidgetIds
 import com.myflow.app.data.aggregateHabitCompletion
 import com.myflow.app.data.calculateHabitStreaks
@@ -91,12 +96,21 @@ private fun <T> List<T>.swapped(first: Int, second: Int): List<T> = toMutableLis
 }
 
 @Composable
-fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository, habits: HabitRepository) {
+fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository, habits: HabitRepository, gym: GymRepository) {
     val tasks by repository.observeTasks().collectAsState(initial = emptyList())
     val rows by dashboards.observe().collectAsState(initial = emptyList())
     val habitRows by habits.observeHabits().collectAsState(initial = emptyList())
     val habitLogs by habits.observeLogs().collectAsState(initial = emptyList())
+    val gymWorkouts by gym.observeWorkouts().collectAsState(initial = emptyList())
+    val gymExercises by gym.observeExercises().collectAsState(initial = emptyList())
+    val gymPrs by gym.observePersonalRecords().collectAsState(initial = emptyList())
+    var gymAggregates by remember { mutableStateOf<List<WorkoutAggregate>>(emptyList()) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(gymWorkouts.size, gymExercises.size) {
+        gym.ensureDefaults()
+        gymAggregates = gym.allAggregates()
+    }
     var activeId by rememberSaveable { mutableStateOf<String?>(null) }
     var composing by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
@@ -303,6 +317,14 @@ fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository,
                     }
                     Text(
                         text = if (habitRows.none { !it.archived }) stringResource(R.string.mascot_no_habits) else stringResource(stageRes),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                if (widget.id == WidgetIds.GYM_OVERVIEW) {
+                    val summary = gymSummary(gymAggregates, gymPrs.ifEmpty { derivePersonalRecords(gymAggregates) })
+                    Text(
+                        text = if (summary.workoutCount == 0) stringResource(R.string.gym_no_workouts)
+                        else "${summary.workoutCount} · ${summary.totalVolume.toInt()} vol · ${summary.prCount} PRs",
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }

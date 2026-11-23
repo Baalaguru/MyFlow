@@ -3,7 +3,7 @@ import { WidgetGrid } from '../components/dashboard/WidgetGrid'
 import { Button, ConfirmDialog, Dialog, ErrorState, IconButton, LoadingSkeleton, TextField, Toast } from '../components/ui'
 import type { TranslationKey } from '../i18n'
 import type { Appearance } from '../lib/appearance'
-import { getSetting, setSetting, type DashboardRecord, type HabitLogRecord, type HabitRecord, type TaskRecord, type WidgetConfig } from '../lib/db'
+import { getSetting, setSetting, type DashboardRecord, type HabitLogRecord, type HabitRecord, type TaskRecord, type WidgetConfig, type WorkoutRecord } from '../lib/db'
 import {
   addWidget,
   createDashboard,
@@ -19,6 +19,7 @@ import {
   saveWidgetLayout,
   setDefaultDashboard,
 } from '../lib/modules/dashboards'
+import { listWorkouts } from '../lib/modules/gym'
 import { listHabitLogs, listHabits } from '../lib/modules/habits'
 import { listTasks, toggleTask } from '../lib/modules/tasks'
 import { accentTokens, backgroundTokens, widgetRegistry, widgetIds, type AccentToken, type BackgroundToken } from '../lib/widgets'
@@ -48,6 +49,7 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const [tasks, setTasks] = useState<TaskRecord[]>([])
   const [habits, setHabits] = useState<HabitRecord[]>([])
   const [habitLogs, setHabitLogs] = useState<HabitLogRecord[]>([])
+  const [workouts, setWorkouts] = useState<WorkoutRecord[]>([])
   const [problem, setProblem] = useState(false)
   const [toast, setToast] = useState<TranslationKey | null>(null)
 
@@ -92,10 +94,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const active = dashboards?.find((row) => row.id === activeId) ?? null
 
   const refreshTasks = async () => {
-    const [localTasks, localHabits, localLogs] = await Promise.all([listTasks(), listHabits(), listHabitLogs()])
+    const [localTasks, localHabits, localLogs, localWorkouts] = await Promise.all([listTasks(), listHabits(), listHabitLogs(), listWorkouts()])
     setTasks(localTasks)
     setHabits(localHabits)
     setHabitLogs(localLogs)
+    setWorkouts(localWorkouts)
     onSaved()
   }
 
@@ -316,6 +319,7 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
         tasks={tasks}
         habits={habits}
         habitLogs={habitLogs}
+        workouts={workouts}
         appearance={appearance}
         onToggleTask={(id) => void handleToggleTask(id)}
         onSaved={() => void refreshTasks()}
