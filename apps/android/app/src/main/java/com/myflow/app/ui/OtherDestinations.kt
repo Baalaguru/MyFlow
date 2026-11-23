@@ -25,7 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -330,7 +330,7 @@ fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository,
                 }
                 if (widget.id == WidgetIds.WEEKLY_STATISTICS || widget.id == WidgetIds.MONTHLY_STATISTICS) {
                     val days = if (widget.id == WidgetIds.WEEKLY_STATISTICS) 7 else 30
-                    val cutoff = java.time.Instant.now().minus(days, java.time.temporal.ChronoUnit.DAYS).toString()
+                    val cutoff = java.time.Instant.now().minus(days.toLong(), java.time.temporal.ChronoUnit.DAYS).toString()
                     val captured = tasks.count { it.createdAt >= cutoff }
                     Text(
                         text = "${stringResource(R.string.chart_captured)}: $captured",

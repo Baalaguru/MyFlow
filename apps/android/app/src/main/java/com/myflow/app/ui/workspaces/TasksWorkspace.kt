@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -25,7 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -321,14 +320,14 @@ fun TasksWorkspace(repository: TaskRepository) {
                         )
                         OutlinedTextField(
                             value = count,
-                            onValueChange = { count = it },
+                            onValueChange = { value: String -> count = value },
                             label = { Text(stringResource(R.string.recurrence_count)) },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
                         )
                         OutlinedTextField(
                             value = until,
-                            onValueChange = { until = it },
+                            onValueChange = { value: String -> until = value },
                             label = { Text(stringResource(R.string.recurrence_until)) },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
@@ -358,7 +357,7 @@ fun TasksWorkspace(repository: TaskRepository) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = subtaskDraft,
-                        onValueChange = { subtaskDraft = it },
+                        onValueChange = { value: String -> subtaskDraft = value },
                         label = { Text(stringResource(R.string.subtask_placeholder)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
@@ -408,7 +407,7 @@ fun TasksWorkspace(repository: TaskRepository) {
             }
             OutlinedTextField(
                 value = query,
-                onValueChange = { query = it },
+                onValueChange = { value: String -> query = value },
                 label = { Text(stringResource(R.string.search_tasks)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -416,14 +415,14 @@ fun TasksWorkspace(repository: TaskRepository) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = priorityFilter,
-                    onValueChange = { priorityFilter = it },
+                    onValueChange = { value: String -> priorityFilter = value },
                     label = { Text(stringResource(R.string.task_field_priority)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = categoryFilter,
-                    onValueChange = { categoryFilter = it },
+                    onValueChange = { value: String -> categoryFilter = value },
                     label = { Text(stringResource(R.string.task_field_category)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
@@ -446,7 +445,8 @@ fun TasksWorkspace(repository: TaskRepository) {
                     Button(onClick = {
                         val id = deletingId
                         deletingId = null
-                        if (id != null) scope.launch { repository.delete(id); statusMessage = R.string.task_deleted }
+                        val toDelete: String? = id
+                        if (toDelete != null) { scope.launch { repository.delete(toDelete); statusMessage = R.string.task_deleted } }
                     }) {
                         Text(stringResource(R.string.delete_task))
                     }

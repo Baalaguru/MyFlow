@@ -36,6 +36,7 @@ import com.myflow.app.data.workoutCompletionProgress
 import com.myflow.app.data.workoutVolume
 import com.myflow.app.ui.navigation.AppDestinations
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun GymWorkspace(repository: GymRepository) {

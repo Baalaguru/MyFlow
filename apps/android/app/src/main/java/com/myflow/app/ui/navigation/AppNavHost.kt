@@ -2,8 +2,8 @@ package com.myflow.app.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import com.myflow.app.data.DashboardRepository
@@ -25,7 +25,7 @@ import com.myflow.app.ui.workspaces.TasksWorkspace
 /** All eleven stable route ids are real Compose destinations and deep-link paths. */
 @Composable
 fun AppNavHost(
-    navController: NavController,
+    navController: NavHostController,
     repository: TaskRepository,
     dashboards: DashboardRepository,
     habits: HabitRepository,
