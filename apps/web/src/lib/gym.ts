@@ -140,17 +140,32 @@ export function formatKg(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }
 
+export function normaliseExerciseMuscleGroups(ex: Partial<ExerciseRecord> & Pick<ExerciseRecord, 'id' | 'name' | 'isCustom' | 'createdAt'>): ExerciseRecord {
+  const raw = ex.muscleGroups ?? (ex.muscleGroup ? [ex.muscleGroup] : ['other'])
+  const groups = [...new Set(raw.filter((g): g is MuscleGroup => muscleGroups.includes(g as MuscleGroup)))]
+  const muscleGroupsFinal = groups.length > 0 ? groups : (['other'] as MuscleGroup[])
+  return {
+    id: ex.id,
+    name: ex.name,
+    muscleGroup: muscleGroupsFinal[0],
+    muscleGroups: muscleGroupsFinal,
+    notes: ex.notes,
+    isCustom: ex.isCustom,
+    createdAt: ex.createdAt,
+  }
+}
+
 export function defaultExercises(now = new Date().toISOString()): ExerciseRecord[] {
-  const seed: Array<[string, string, MuscleGroup]> = [
-    ['bench-press', 'Bench Press', 'chest'],
-    ['squat', 'Squat', 'legs'],
-    ['deadlift', 'Deadlift', 'back'],
-    ['overhead-press', 'Overhead Press', 'shoulders'],
-    ['barbell-row', 'Barbell Row', 'back'],
-    ['pull-up', 'Pull-up', 'back'],
-    ['bicep-curl', 'Bicep Curl', 'arms'],
-    ['tricep-extension', 'Tricep Extension', 'arms'],
-    ['plank', 'Plank', 'core'],
+  const seed: Array<[string, string, MuscleGroup[]]> = [
+    ['bench-press', 'Bench Press', ['chest', 'arms']],
+    ['squat', 'Squat', ['legs']],
+    ['deadlift', 'Deadlift', ['back', 'legs']],
+    ['overhead-press', 'Overhead Press', ['shoulders', 'arms']],
+    ['barbell-row', 'Barbell Row', ['back', 'arms']],
+    ['pull-up', 'Pull-up', ['back', 'arms']],
+    ['bicep-curl', 'Bicep Curl', ['arms']],
+    ['tricep-extension', 'Tricep Extension', ['arms']],
+    ['plank', 'Plank', ['core']],
   ]
-  return seed.map(([id, name, muscleGroup]) => ({ id, name, muscleGroup, isCustom: false, createdAt: now }))
+  return seed.map(([id, name, groups]) => ({ id, name, muscleGroup: groups[0], muscleGroups: groups, isCustom: false, createdAt: now }))
 }

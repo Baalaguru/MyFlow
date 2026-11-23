@@ -89,7 +89,9 @@ export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'co
 export interface ExerciseRecord {
   id: string
   name: string
-  muscleGroup: MuscleGroup
+  /** v1 single-group field kept for backward compat; prefer muscleGroups. */
+  muscleGroup?: MuscleGroup
+  muscleGroups: MuscleGroup[]
   notes?: string
   isCustom: boolean
   createdAt: string

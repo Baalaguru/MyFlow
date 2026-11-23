@@ -107,19 +107,33 @@ if ($SkipAndroid) {
   Add-Result 'Android debug build' 'NOT APPLICABLE' 'ANDROID_HOME is not set; no SDK, emulator, or device available'
 } else {
   $gradlew = Join-Path $PSScriptRoot '..\apps\android\gradlew.bat'
-  if (-not (Test-Path -LiteralPath $gradlew)) {
-    Add-Result 'Android debug build' 'FAIL' 'ANDROID_HOME is set but the Gradle wrapper is missing'
+  $gradleCmd = Get-Command gradle -ErrorAction SilentlyContinue
+  if (-not (Test-Path -LiteralPath $gradlew) -and -not $gradleCmd) {
+    Add-Result 'Android debug build' 'FAIL' 'ANDROID_HOME is set but neither Gradle wrapper nor gradle command is available'
   } else {
     Push-Location (Join-Path $PSScriptRoot '..\apps\android')
+    $prevEap = $ErrorActionPreference
+    $hadNativePref = Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue
+    $prevNativePref = $PSNativeCommandUseErrorActionPreference
     try {
-      & .\gradlew.bat :app:installDebug
-      if ($LASTEXITCODE -eq 0) {
-        Add-Result 'Android debug build' 'PASS' 'installDebug succeeded; launch and widget check must still be done on device'
+      $ErrorActionPreference = 'Continue'
+      if ($hadNativePref) { $PSNativeCommandUseErrorActionPreference = $false }
+      if (Test-Path -LiteralPath $gradlew) {
+        $gradleOutput = & .\gradlew.bat :app:installDebug 2>&1
       } else {
-        Add-Result 'Android debug build' 'FAIL' 'gradlew :app:installDebug failed'
+        $gradleOutput = & gradle :app:installDebug 2>&1
       }
+      $gradleExit = $LASTEXITCODE
     } finally {
+      $ErrorActionPreference = $prevEap
+      if ($hadNativePref) { $PSNativeCommandUseErrorActionPreference = $prevNativePref }
       Pop-Location
+    }
+    if ($gradleExit -eq 0) {
+      Add-Result 'Android debug build' 'PASS' 'installDebug succeeded; launch and widget check must still be done on device'
+    } else {
+      $tail = (($gradleOutput | ForEach-Object { [string]$_ }) | Select-Object -Last 5) -join '; '
+      Add-Result 'Android debug build' 'FAIL' "Android :app:installDebug failed: $tail"
     }
   }
 }

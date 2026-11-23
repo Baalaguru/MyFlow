@@ -132,6 +132,7 @@
     <string name="gym_total_volume">Total volume</string>
     <string name="gym_prs">PRs</string>
     <string name="gym_no_workouts">No workouts logged yet.</string>
+    <string name="gym_exercises">Exercises</string>
     <string name="gym_filter_active">Active</string>
     <string name="gym_filter_completed">Completed</string>
     <string name="gym_finish_workout">Finish workout</string>

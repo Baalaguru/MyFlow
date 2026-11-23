@@ -259,6 +259,15 @@ interface GymDao {
     @Upsert
     suspend fun saveExercise(exercise: GymExerciseEntity)
 
+    @Query("SELECT COUNT(*) FROM gym_workout_exercises WHERE exerciseId = :exerciseId")
+    suspend fun exerciseUsageCount(exerciseId: String): Int
+
+    @Query("DELETE FROM gym_exercises WHERE id = :id")
+    suspend fun deleteExercise(id: String)
+
+    @Query("DELETE FROM gym_personal_records WHERE exerciseId = :exerciseId")
+    suspend fun deletePersonalRecordsForExercise(exerciseId: String)
+
     @Query("SELECT * FROM gym_workouts ORDER BY startedAt DESC")
     fun observeWorkouts(): Flow<List<GymWorkoutEntity>>
 

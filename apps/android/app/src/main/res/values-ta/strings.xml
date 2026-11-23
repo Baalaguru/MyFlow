@@ -132,6 +132,7 @@
     <string name="gym_total_volume">மொத்த அளவு</string>
     <string name="gym_prs">சிறந்த சாதனைகள்</string>
     <string name="gym_no_workouts">இன்னும் பயிற்சிகள் பதிவு செய்யப்படவில்லை.</string>
+    <string name="gym_exercises">Exercises</string>
     <string name="gym_filter_active">செயலில்</string>
     <string name="gym_filter_completed">நிறைவேற்றியது</string>
     <string name="gym_finish_workout">பயிற்சியை முடி</string>

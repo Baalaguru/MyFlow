@@ -1,5 +1,5 @@
 import { db, type ExerciseRecord, type MuscleGroup, type PersonalRecordRecord, type WorkoutExerciseRecord, type WorkoutRecord, type WorkoutSetRecord } from '../db'
-import { defaultExercises, derivePersonalRecords } from '../gym'
+import { defaultExercises, derivePersonalRecords, normaliseExerciseMuscleGroups } from '../gym'
 
 function newId(): string {
   return crypto.randomUUID()
@@ -41,7 +41,12 @@ export function normaliseWorkout(row: WorkoutRecord): WorkoutRecord {
 
 export async function ensureDefaultExercises(): Promise<ExerciseRecord[]> {
   const existing = await db.exercises.toArray()
-  if (existing.length > 0) return existing.sort((a, b) => a.name.localeCompare(b.name))
+  if (existing.length > 0) {
+    const normalised = existing.map(normaliseExerciseMuscleGroups)
+    const changed = normalised.some((n, i) => JSON.stringify(n.muscleGroups) !== JSON.stringify(existing[i].muscleGroups))
+    if (changed) await db.exercises.bulkPut(normalised)
+    return normalised.sort((a, b) => a.name.localeCompare(b.name))
+  }
   const seeded = defaultExercises()
   await db.exercises.bulkPut(seeded)
   return seeded
@@ -52,19 +57,31 @@ export async function listExercises(): Promise<ExerciseRecord[]> {
   return rows.sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export async function createExercise(input: { name: string; muscleGroup: MuscleGroup; notes?: string }): Promise<ExerciseRecord> {
+export async function createExercise(input: { name: string; muscleGroups: MuscleGroup[]; notes?: string }): Promise<ExerciseRecord> {
   const name = input.name.trim()
   if (!name) throw new Error('empty exercise name')
-  const record: ExerciseRecord = {
+  const groups = [...new Set(input.muscleGroups)].filter(Boolean)
+  const muscleGroups = groups.length > 0 ? groups : (['other'] as MuscleGroup[])
+  const record: ExerciseRecord = normaliseExerciseMuscleGroups({
     id: newId(),
     name,
-    muscleGroup: input.muscleGroup,
+    muscleGroup: muscleGroups[0],
+    muscleGroups,
     notes: input.notes?.trim() || undefined,
     isCustom: true,
     createdAt: new Date().toISOString(),
-  }
+  })
   await db.exercises.add(record)
   return record
+}
+
+export async function deleteExercise(id: string): Promise<boolean> {
+  const workouts = await db.workouts.toArray()
+  const inUse = workouts.some((w) => (w.exercises ?? []).some((ex) => ex.exerciseId === id))
+  if (inUse) return false
+  await db.exercises.delete(id)
+  await db.personalRecords.where('exerciseId').equals(id).delete()
+  return true
 }
 
 export async function listWorkouts(): Promise<WorkoutRecord[]> {
