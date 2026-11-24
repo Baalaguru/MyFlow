@@ -1,9 +1,11 @@
 package com.myflow.app.data
 
 import android.content.Context
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.Insert
 import androidx.room.migration.Migration
 import androidx.room.PrimaryKey
@@ -170,6 +172,97 @@ data class GymPersonalRecordEntity(
     val setId: String,
 )
 
+/** Phase 9 canonical food record; nutrition values are per serving. */
+@Entity(tableName = "foods", indices = [Index(value = ["name"])])
+data class FoodEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val servingSize: String,
+    val servingGrams: Double? = null,
+    val calories: Double = 0.0,
+    val protein: Double = 0.0,
+    val carbs: Double = 0.0,
+    val fat: Double = 0.0,
+    val source: String = "manual",
+    val sourceRef: String? = null,
+    val imageRef: String? = null,
+    val notes: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+@Entity(
+    tableName = "meal_entries",
+    indices = [Index(value = ["localDate"]), Index(value = ["foodId"]), Index(value = ["recipeId"])],
+)
+data class MealEntryEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val mealType: String,
+    val foodId: String? = null,
+    val recipeId: String? = null,
+    val quantity: Double,
+    val notes: String? = null,
+    val imageRef: String? = null,
+    val loggedAt: String,
+)
+
+@Entity(
+    tableName = "meal_plans",
+    indices = [Index(value = ["localDate"]), Index(value = ["foodId"]), Index(value = ["recipeId"])],
+)
+data class MealPlanEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val mealType: String,
+    val foodId: String? = null,
+    val recipeId: String? = null,
+    val quantity: Double,
+    val notes: String? = null,
+    val plannedAt: String,
+)
+
+@Entity(tableName = "recipes")
+data class RecipeEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val servings: Int,
+    val prepMinutes: Int = 0,
+    val cookMinutes: Int = 0,
+    val favorite: Boolean = false,
+    val notes: String? = null,
+    val imageRef: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+@Entity(tableName = "recipe_ingredients", indices = [Index(value = ["recipeId"]), Index(value = ["foodId"])])
+data class RecipeIngredientEntity(
+    @PrimaryKey val id: String,
+    val recipeId: String,
+    val foodId: String,
+    val quantity: Double,
+)
+
+@Entity(tableName = "recipe_steps", indices = [Index(value = ["recipeId"])])
+data class RecipeStepEntity(
+    @PrimaryKey val id: String,
+    val recipeId: String,
+    @ColumnInfo(name = "stepOrder") val order: Int,
+    val text: String,
+)
+
+@Entity(tableName = "nutrition_goals", indices = [Index(value = ["localDate"])])
+data class NutritionGoalEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val calories: Double = 0.0,
+    val protein: Double = 0.0,
+    val carbs: Double = 0.0,
+    val fat: Double = 0.0,
+    val updatedAt: String,
+)
+
 @Dao
 interface DashboardDao {
     @Query("SELECT * FROM dashboards ORDER BY sortOrder ASC, createdAt ASC")
@@ -326,6 +419,144 @@ interface GymDao {
     suspend fun clearPersonalRecords()
 }
 
+@Dao
+interface FoodDao {
+    @Query("SELECT * FROM foods ORDER BY name ASC")
+    fun observeFoods(): Flow<List<FoodEntity>>
+
+    @Query("SELECT * FROM foods ORDER BY name ASC")
+    suspend fun foods(): List<FoodEntity>
+
+    @Query("SELECT * FROM foods WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    suspend fun searchFoods(query: String): List<FoodEntity>
+
+    @Query("SELECT * FROM foods WHERE id = :id")
+    suspend fun food(id: String): FoodEntity?
+
+    @Upsert
+    suspend fun saveFood(food: FoodEntity)
+
+    @Query("SELECT COUNT(*) FROM meal_entries WHERE foodId = :id")
+    suspend fun foodEntryUsage(id: String): Int
+
+    @Query("SELECT COUNT(*) FROM meal_plans WHERE foodId = :id")
+    suspend fun foodPlanUsage(id: String): Int
+
+    @Query("SELECT COUNT(*) FROM recipe_ingredients WHERE foodId = :id")
+    suspend fun foodIngredientUsage(id: String): Int
+
+    @Query("DELETE FROM foods WHERE id = :id")
+    suspend fun deleteFood(id: String)
+
+    @Query("SELECT * FROM meal_entries ORDER BY localDate ASC, loggedAt ASC")
+    fun observeEntries(): Flow<List<MealEntryEntity>>
+
+    @Query("SELECT * FROM meal_entries ORDER BY localDate ASC, loggedAt ASC")
+    suspend fun entries(): List<MealEntryEntity>
+
+    @Query("SELECT * FROM meal_entries WHERE localDate = :localDate ORDER BY loggedAt ASC")
+    suspend fun entriesForDate(localDate: String): List<MealEntryEntity>
+
+    @Query("SELECT * FROM meal_entries WHERE id = :id")
+    suspend fun entry(id: String): MealEntryEntity?
+
+    @Upsert
+    suspend fun saveEntry(entry: MealEntryEntity)
+
+    @Query("DELETE FROM meal_entries WHERE id = :id")
+    suspend fun deleteEntry(id: String)
+
+    @Query("SELECT * FROM meal_plans ORDER BY localDate ASC, plannedAt ASC")
+    fun observePlans(): Flow<List<MealPlanEntity>>
+
+    @Query("SELECT * FROM meal_plans ORDER BY localDate ASC, plannedAt ASC")
+    suspend fun plans(): List<MealPlanEntity>
+
+    @Query("SELECT * FROM meal_plans WHERE localDate = :localDate ORDER BY plannedAt ASC")
+    suspend fun plansForDate(localDate: String): List<MealPlanEntity>
+
+    @Query("SELECT * FROM meal_plans WHERE id = :id")
+    suspend fun plan(id: String): MealPlanEntity?
+
+    @Upsert
+    suspend fun savePlan(plan: MealPlanEntity)
+
+    @Query("DELETE FROM meal_plans WHERE id = :id")
+    suspend fun deletePlan(id: String)
+
+    @Query("SELECT * FROM recipes ORDER BY name ASC")
+    fun observeRecipes(): Flow<List<RecipeEntity>>
+
+    @Query("SELECT * FROM recipes ORDER BY name ASC")
+    suspend fun recipes(): List<RecipeEntity>
+
+    @Query("SELECT * FROM recipes WHERE id = :id")
+    suspend fun recipe(id: String): RecipeEntity?
+
+    @Upsert
+    suspend fun saveRecipe(recipe: RecipeEntity)
+
+    @Query("SELECT COUNT(*) FROM meal_entries WHERE recipeId = :id")
+    suspend fun recipeEntryUsage(id: String): Int
+
+    @Query("SELECT COUNT(*) FROM meal_plans WHERE recipeId = :id")
+    suspend fun recipePlanUsage(id: String): Int
+
+    @Query("DELETE FROM recipes WHERE id = :id")
+    suspend fun deleteRecipe(id: String)
+
+    @Query("SELECT * FROM recipe_ingredients ORDER BY recipeId ASC, id ASC")
+    fun observeIngredients(): Flow<List<RecipeIngredientEntity>>
+
+    @Query("SELECT * FROM recipe_ingredients WHERE recipeId = :recipeId ORDER BY id ASC")
+    suspend fun ingredientsFor(recipeId: String): List<RecipeIngredientEntity>
+
+    @Query("SELECT * FROM recipe_ingredients ORDER BY recipeId ASC, id ASC")
+    suspend fun ingredients(): List<RecipeIngredientEntity>
+
+    @Upsert
+    suspend fun saveIngredient(ingredient: RecipeIngredientEntity)
+
+    @Query("DELETE FROM recipe_ingredients WHERE id = :id")
+    suspend fun deleteIngredient(id: String)
+
+    @Query("DELETE FROM recipe_ingredients WHERE recipeId = :recipeId")
+    suspend fun deleteIngredientsForRecipe(recipeId: String)
+
+    @Query("SELECT * FROM recipe_steps ORDER BY recipeId ASC, stepOrder ASC")
+    fun observeSteps(): Flow<List<RecipeStepEntity>>
+
+    @Query("SELECT * FROM recipe_steps WHERE recipeId = :recipeId ORDER BY stepOrder ASC")
+    suspend fun stepsFor(recipeId: String): List<RecipeStepEntity>
+
+    @Query("SELECT * FROM recipe_steps ORDER BY recipeId ASC, stepOrder ASC")
+    suspend fun steps(): List<RecipeStepEntity>
+
+    @Upsert
+    suspend fun saveStep(step: RecipeStepEntity)
+
+    @Query("DELETE FROM recipe_steps WHERE id = :id")
+    suspend fun deleteStep(id: String)
+
+    @Query("DELETE FROM recipe_steps WHERE recipeId = :recipeId")
+    suspend fun deleteStepsForRecipe(recipeId: String)
+
+    @Query("SELECT * FROM nutrition_goals ORDER BY localDate ASC")
+    fun observeGoals(): Flow<List<NutritionGoalEntity>>
+
+    @Query("SELECT * FROM nutrition_goals ORDER BY localDate ASC")
+    suspend fun goals(): List<NutritionGoalEntity>
+
+    @Query("SELECT * FROM nutrition_goals WHERE localDate = :localDate LIMIT 1")
+    suspend fun goalForDate(localDate: String): NutritionGoalEntity?
+
+    @Upsert
+    suspend fun saveGoal(goal: NutritionGoalEntity)
+
+    @Query("DELETE FROM nutrition_goals WHERE id = :id")
+    suspend fun deleteGoal(id: String)
+}
+
 /**
  * Adds only the tasks table. The existing settings table and its rows are untouched.
  */
@@ -446,14 +677,77 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
     }
 }
 
+/** Adds only Phase 9 food tables and indexes. No existing table or row is dropped or rewritten. */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `foods` (" +
+                "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `servingSize` TEXT NOT NULL, " +
+                "`servingGrams` REAL, `calories` REAL NOT NULL, `protein` REAL NOT NULL, " +
+                "`carbs` REAL NOT NULL, `fat` REAL NOT NULL, `source` TEXT NOT NULL, " +
+                "`sourceRef` TEXT, `imageRef` TEXT, `notes` TEXT, " +
+                "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_foods_name` ON `foods` (`name`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `meal_entries` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `mealType` TEXT NOT NULL, " +
+                "`foodId` TEXT, `recipeId` TEXT, `quantity` REAL NOT NULL, `notes` TEXT, " +
+                "`imageRef` TEXT, `loggedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_entries_localDate` ON `meal_entries` (`localDate`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_entries_foodId` ON `meal_entries` (`foodId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_entries_recipeId` ON `meal_entries` (`recipeId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `meal_plans` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `mealType` TEXT NOT NULL, " +
+                "`foodId` TEXT, `recipeId` TEXT, `quantity` REAL NOT NULL, `notes` TEXT, " +
+                "`plannedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_plans_localDate` ON `meal_plans` (`localDate`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_plans_foodId` ON `meal_plans` (`foodId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_meal_plans_recipeId` ON `meal_plans` (`recipeId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `recipes` (" +
+                "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `servings` INTEGER NOT NULL, " +
+                "`prepMinutes` INTEGER NOT NULL, `cookMinutes` INTEGER NOT NULL, " +
+                "`favorite` INTEGER NOT NULL, `notes` TEXT, `imageRef` TEXT, " +
+                "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `recipe_ingredients` (" +
+                "`id` TEXT NOT NULL, `recipeId` TEXT NOT NULL, `foodId` TEXT NOT NULL, " +
+                "`quantity` REAL NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recipe_ingredients_recipeId` ON `recipe_ingredients` (`recipeId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recipe_ingredients_foodId` ON `recipe_ingredients` (`foodId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `recipe_steps` (" +
+                "`id` TEXT NOT NULL, `recipeId` TEXT NOT NULL, `stepOrder` INTEGER NOT NULL, " +
+                "`text` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_recipe_steps_recipeId` ON `recipe_steps` (`recipeId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `nutrition_goals` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `calories` REAL NOT NULL, " +
+                "`protein` REAL NOT NULL, `carbs` REAL NOT NULL, `fat` REAL NOT NULL, " +
+                "`updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_nutrition_goals_localDate` ON `nutrition_goals` (`localDate`)")
+    }
+}
+
 @Database(
     entities = [
         SettingEntity::class, TaskEntity::class, DashboardEntity::class,
         HabitEntity::class, HabitLogEntity::class, MascotStateEntity::class,
         GymExerciseEntity::class, GymWorkoutEntity::class, GymWorkoutExerciseEntity::class,
         GymSetEntity::class, GymPersonalRecordEntity::class,
+        FoodEntity::class, MealEntryEntity::class, MealPlanEntity::class,
+        RecipeEntity::class, RecipeIngredientEntity::class, RecipeStepEntity::class,
+        NutritionGoalEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(TaskJsonConverters::class)
@@ -463,6 +757,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun dashboardDao(): DashboardDao
     abstract fun habitDao(): HabitDao
     abstract fun gymDao(): GymDao
+    abstract fun foodDao(): FoodDao
 
     companion object {
         @Volatile
@@ -475,7 +770,10 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "myflow.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(
+                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
+                        MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
+                    )
                     .build().also { instance = it }
             }
     }

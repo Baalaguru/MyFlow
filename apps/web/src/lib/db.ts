@@ -133,6 +133,89 @@ export interface PersonalRecordRecord {
   setId: string
 }
 
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+export type FoodSource = 'manual' | 'import'
+
+/** Nutrition values are per serving for foods, per serving for recipes. */
+export interface FoodRecord {
+  id: string
+  name: string
+  servingSize: string
+  servingGrams?: number
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  source: FoodSource
+  sourceRef?: string
+  imageRef?: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MealEntryRecord {
+  id: string
+  localDate: string
+  mealType: MealType
+  foodId?: string
+  recipeId?: string
+  quantity: number
+  notes?: string
+  imageRef?: string
+  loggedAt: string
+}
+
+export interface MealPlanRecord {
+  id: string
+  localDate: string
+  mealType: MealType
+  foodId?: string
+  recipeId?: string
+  quantity: number
+  notes?: string
+  plannedAt: string
+}
+
+export interface RecipeIngredientRecord {
+  id: string
+  recipeId: string
+  foodId: string
+  quantity: number
+}
+
+export interface RecipeStepRecord {
+  id: string
+  recipeId: string
+  order: number
+  text: string
+}
+
+export interface RecipeRecord {
+  id: string
+  name: string
+  servings: number
+  prepMinutes: number
+  cookMinutes: number
+  favorite: boolean
+  notes?: string
+  imageRef?: string
+  ingredients: RecipeIngredientRecord[]
+  steps: RecipeStepRecord[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NutritionGoalRecord {
+  id: string
+  localDate: string
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+  updatedAt: string
+}
+
 export interface WidgetConfig {
   id: WidgetId
   columns: number
@@ -161,6 +244,11 @@ class MyFlowDatabase extends Dexie {
   exercises!: Table<ExerciseRecord, string>
   workouts!: Table<WorkoutRecord, string>
   personalRecords!: Table<PersonalRecordRecord, string>
+  foods!: Table<FoodRecord, string>
+  mealEntries!: Table<MealEntryRecord, string>
+  mealPlans!: Table<MealPlanRecord, string>
+  recipes!: Table<RecipeRecord, string>
+  nutritionGoals!: Table<NutritionGoalRecord, string>
 
   constructor() {
     super('myflow')
@@ -196,6 +284,22 @@ class MyFlowDatabase extends Dexie {
       exercises: 'id, name, muscleGroup, isCustom, createdAt',
       workouts: 'id, startedAt, endedAt',
       personalRecords: 'id, exerciseId, metric, achievedAt, [exerciseId+metric]',
+    })
+    this.version(6).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
+      dashboards: 'id, order, isDefault',
+      habits: 'id, paused, archived, createdAt',
+      habitLogs: 'id, habitId, localDate, [habitId+localDate], status',
+      mascotState: 'id',
+      exercises: 'id, name, muscleGroup, isCustom, createdAt',
+      workouts: 'id, startedAt, endedAt',
+      personalRecords: 'id, exerciseId, metric, achievedAt, [exerciseId+metric]',
+      foods: 'id, name, source, createdAt, updatedAt',
+      mealEntries: 'id, localDate, mealType, foodId, recipeId, [localDate+mealType], loggedAt',
+      mealPlans: 'id, localDate, mealType, foodId, recipeId, [localDate+mealType], plannedAt',
+      recipes: 'id, name, favorite, createdAt, updatedAt',
+      nutritionGoals: 'id, localDate, updatedAt',
     })
   }
 }

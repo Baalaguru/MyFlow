@@ -3,7 +3,21 @@ import { WidgetGrid } from '../components/dashboard/WidgetGrid'
 import { Button, ConfirmDialog, Dialog, ErrorState, IconButton, LoadingSkeleton, TextField, Toast } from '../components/ui'
 import type { TranslationKey } from '../i18n'
 import type { Appearance } from '../lib/appearance'
-import { getSetting, setSetting, type DashboardRecord, type HabitLogRecord, type HabitRecord, type TaskRecord, type WidgetConfig, type WorkoutRecord } from '../lib/db'
+import {
+  getSetting,
+  setSetting,
+  type DashboardRecord,
+  type FoodRecord,
+  type HabitLogRecord,
+  type HabitRecord,
+  type MealEntryRecord,
+  type MealPlanRecord,
+  type NutritionGoalRecord,
+  type RecipeRecord,
+  type TaskRecord,
+  type WidgetConfig,
+  type WorkoutRecord,
+} from '../lib/db'
 import {
   addWidget,
   createDashboard,
@@ -19,6 +33,13 @@ import {
   saveWidgetLayout,
   setDefaultDashboard,
 } from '../lib/modules/dashboards'
+import {
+  listFoods,
+  listMealEntries,
+  listMealPlans,
+  listNutritionGoals,
+  listRecipes,
+} from '../lib/modules/food'
 import { listWorkouts } from '../lib/modules/gym'
 import { listHabitLogs, listHabits } from '../lib/modules/habits'
 import { listTasks, toggleTask } from '../lib/modules/tasks'
@@ -50,6 +71,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const [habits, setHabits] = useState<HabitRecord[]>([])
   const [habitLogs, setHabitLogs] = useState<HabitLogRecord[]>([])
   const [workouts, setWorkouts] = useState<WorkoutRecord[]>([])
+  const [foods, setFoods] = useState<FoodRecord[]>([])
+  const [mealEntries, setMealEntries] = useState<MealEntryRecord[]>([])
+  const [mealPlans, setMealPlans] = useState<MealPlanRecord[]>([])
+  const [nutritionGoals, setNutritionGoals] = useState<NutritionGoalRecord[]>([])
+  const [recipes, setRecipes] = useState<RecipeRecord[]>([])
   const [problem, setProblem] = useState(false)
   const [toast, setToast] = useState<TranslationKey | null>(null)
 
@@ -65,12 +91,17 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const load = useCallback(async () => {
     setProblem(false)
     try {
-      const [rows, storedId, localTasks, localHabits, localLogs] = await Promise.all([
+      const [rows, storedId, localTasks, localHabits, localLogs, localFoods, localEntries, localPlans, localGoals, localRecipes] = await Promise.all([
         ensureDefaultDashboard(),
         getSetting<string | null>(ACTIVE_KEY, null),
         listTasks(),
         listHabits(),
         listHabitLogs(),
+        listFoods(),
+        listMealEntries(),
+        listMealPlans(),
+        listNutritionGoals(),
+        listRecipes(),
       ])
       const active = rows.find((row) => row.id === storedId) ?? rows.find((row) => row.isDefault) ?? rows[0]
       setDashboards(rows)
@@ -78,6 +109,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
       setTasks(localTasks)
       setHabits(localHabits)
       setHabitLogs(localLogs)
+      setFoods(localFoods)
+      setMealEntries(localEntries)
+      setMealPlans(localPlans)
+      setNutritionGoals(localGoals)
+      setRecipes(localRecipes)
     } catch {
       setProblem(true)
     }
@@ -94,11 +130,19 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const active = dashboards?.find((row) => row.id === activeId) ?? null
 
   const refreshTasks = async () => {
-    const [localTasks, localHabits, localLogs, localWorkouts] = await Promise.all([listTasks(), listHabits(), listHabitLogs(), listWorkouts()])
+    const [localTasks, localHabits, localLogs, localWorkouts, localFoods, localEntries, localPlans, localGoals, localRecipes] = await Promise.all([
+      listTasks(), listHabits(), listHabitLogs(), listWorkouts(),
+      listFoods(), listMealEntries(), listMealPlans(), listNutritionGoals(), listRecipes(),
+    ])
     setTasks(localTasks)
     setHabits(localHabits)
     setHabitLogs(localLogs)
     setWorkouts(localWorkouts)
+    setFoods(localFoods)
+    setMealEntries(localEntries)
+    setMealPlans(localPlans)
+    setNutritionGoals(localGoals)
+    setRecipes(localRecipes)
     onSaved()
   }
 
@@ -320,6 +364,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
         habits={habits}
         habitLogs={habitLogs}
         workouts={workouts}
+        foods={foods}
+        mealEntries={mealEntries}
+        mealPlans={mealPlans}
+        nutritionGoals={nutritionGoals}
+        recipes={recipes}
         appearance={appearance}
         onToggleTask={(id) => void handleToggleTask(id)}
         onSaved={() => void refreshTasks()}

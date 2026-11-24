@@ -17,7 +17,7 @@ Source: Phase 28 of `MyFlow tasks.md`, plus scope decisions confirmed during pla
 | D-06 | Sync conflict policy | Resolved | **Smart merge with manual resolution** of true conflicts | Field-level three-way merge, append-only entity classes, conflict queue, tombstones; never silently discard |
 | D-07 | Server PC availability | Resolved | **Best-effort server; local-first regardless of availability** | Server is a sync/backup peer; no feature gates on connectivity; exponential backoff; offline parity tests |
 | D-08 | Exact Android widget release scope | Resolved | Prioritize **To-Do checklist, Habit quick completion, Mascot + streak, Gym quick access, Quick capture, Finance spending summary** | Six Glance widgets in the architecture; exact sizes and interactions finalized at detailed design |
-| D-09 | External nutrition database provider | Resolved | **Manual nutrition entry plus recipes**; external provider deferred | `Food`/`FoodNutrition`/`Recipe*` in v1; nullable `source` and `source_ref` reserved for future imports |
+| D-09 | External nutrition database provider | Resolved | **Manual nutrition entry plus recipes**; external provider deferred | `Food`/`FoodNutrition`/`Recipe*` in v1; nullable `source` and `source_ref` reserved for future imports; Phase 9 boundary detailed in [ADR-0025](../adr/0025-food-and-nutrition-tracker.md) |
 | D-10 | Exact UI design and component styling | Resolved | **Design tokens are the contract**; detailed mockups are a later design task | Token pipeline, five presets, contrast guard, and typography scale defined before feature UI work |
 
 ## Scope confirmations

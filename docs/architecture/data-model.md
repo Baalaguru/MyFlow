@@ -88,11 +88,12 @@ Every table carries `id`, `revision`, `hlc_created`, `hlc_updated`, and nullable
 | `Food` | name, serving size, source enum (manual / reserved import), nullable `source_ref` |
 | `FoodNutrition` | food ref, calories, protein, carbs, fat per serving |
 | `Meal` | `local_date`, meal type (Breakfast/Lunch/Dinner/Snack) |
-| `MealEntry` | meal ref, food or recipe ref, quantity, optional image ref, notes, logged instant |
+| `MealEntry` | local date, meal type, food or recipe ref, quantity in servings, optional image ref, notes, logged instant |
+| `MealPlan` | local date, meal type, food or recipe ref, quantity in servings, optional notes, planned instant; explicit planned record for planned-versus-consumed analytics |
 | `Recipe` | name, image ref, prep/cook minutes, servings, favorite, notes |
 | `RecipeIngredient` | recipe ref, food ref, quantity |
 | `RecipeStep` | recipe ref, order index, instruction text |
-| `NutritionGoal` | date range, calories/protein/carbs/fat targets |
+| `NutritionGoal` | local date, calories/protein/carbs/fat targets |
 
 ### Cardio
 
@@ -144,6 +145,8 @@ Defined as a boundary in contracts; no tables are created in v1:
 | Every journal entry has its own instant | Deferred schema includes timezone-aware instant fields |
 | Every task supports independent completion | Task and subtask completion are separate columns |
 | Every habit log links to its habit | Non-null foreign key |
+| Food/recipe references are stable | In-use food and recipe records cannot be deleted; meal entries and plans keep their referenced record id |
+| Planned nutrition is never inferred from entries | Explicit `MealPlan` records are compared with `MealEntry` records by local date |
 | Dashboards/widgets have independent configuration | Configuration JSON owned by `DashboardWidget` row |
 | Finance card reference is optional | Nullable `card_label`; required only by UI validation for Credit Card |
 | Cycling route points optional and separate | Separate table, not written in v1 |

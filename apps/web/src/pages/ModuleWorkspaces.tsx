@@ -6,7 +6,7 @@ import type { TranslationKey } from '../i18n'
 import { routeLabelKeys, type RouteId } from '../lib/routes'
 import { unavailableProgress } from '../lib/progress'
 
-export type EmptyModuleRoute = Extract<RouteId, 'habits' | 'mascot' | 'food' | 'cardio' | 'finance'>
+export type EmptyModuleRoute = Extract<RouteId, 'habits' | 'mascot' | 'cardio' | 'finance'>
 
 interface EmptyModuleWorkspaceProps {
   route: EmptyModuleRoute
@@ -16,7 +16,6 @@ interface EmptyModuleWorkspaceProps {
 const subtitles: Record<EmptyModuleRoute, TranslationKey> = {
   habits: 'workspaceSubtitleHabits',
   mascot: 'workspaceSubtitleMascot',
-  food: 'workspaceSubtitleFood',
   cardio: 'workspaceSubtitleCardio',
   finance: 'workspaceSubtitleFinance',
 }
@@ -24,7 +23,6 @@ const subtitles: Record<EmptyModuleRoute, TranslationKey> = {
 const emptyMessages: Record<EmptyModuleRoute, TranslationKey> = {
   habits: 'moduleEmptyHabits',
   mascot: 'moduleEmptyMascot',
-  food: 'moduleEmptyFood',
   cardio: 'moduleEmptyCardio',
   finance: 'moduleEmptyFinance',
 }
@@ -54,20 +52,6 @@ function WorkspaceBody({ route, t }: EmptyModuleWorkspaceProps) {
         </div>
       )
 
-    case 'food':
-      return (
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {Array.from({ length: 3 }, (_, index) => (
-              <div key={index} className="panel p-5">
-                <p className="eyebrow">{t('notRecorded')}</p>
-                <p className="stat-number mt-2">—</p>
-              </div>
-            ))}
-          </div>
-          {empty}
-        </div>
-      )
     case 'cardio':
       return (
         <div className="space-y-4">

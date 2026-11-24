@@ -13,6 +13,7 @@ import {
 } from './lib/appearance'
 import { moduleRouteIds, type RouteId } from './lib/routes'
 import { DashboardPage } from './pages/DashboardPage'
+import { FoodWorkspace } from './pages/FoodWorkspace'
 import { EmptyModuleWorkspace, type EmptyModuleRoute } from './pages/ModuleWorkspaces'
 import { GymWorkspace } from './pages/GymWorkspace'
 import { HabitsWorkspace } from './pages/HabitsWorkspace'
@@ -28,7 +29,7 @@ const DesignSystemPage = lazy(() =>
 )
 
 const emptyModuleRoutes = moduleRouteIds.filter(
-  (route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot' && route !== 'gym',
+  (route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot' && route !== 'gym' && route !== 'food',
 ) as EmptyModuleRoute[]
 
 function isEmptyModuleRoute(route: RouteId): route is EmptyModuleRoute {
@@ -104,6 +105,16 @@ export default function App() {
     if (route === 'gym') {
       return (
         <GymWorkspace
+          t={t}
+          appearance={appearance}
+          revision={captureRevision}
+          onSaved={() => setCaptureRevision((value) => value + 1)}
+        />
+      )
+    }
+    if (route === 'food') {
+      return (
+        <FoodWorkspace
           t={t}
           appearance={appearance}
           revision={captureRevision}

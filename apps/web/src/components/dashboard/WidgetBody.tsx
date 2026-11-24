@@ -4,7 +4,19 @@ import type { TranslationKey } from '../../i18n'
 import type { Appearance } from '../../lib/appearance'
 import { resolveColorMode } from '../../lib/appearance'
 import { monthlyTaskSeries, weeklyTaskSeries, hasSeriesData } from '../../lib/analytics'
-import type { HabitLogRecord, HabitRecord, TaskRecord, WidgetConfig, WorkoutRecord } from '../../lib/db'
+import type {
+  FoodRecord,
+  HabitLogRecord,
+  HabitRecord,
+  MealEntryRecord,
+  MealPlanRecord,
+  NutritionGoalRecord,
+  RecipeRecord,
+  TaskRecord,
+  WidgetConfig,
+  WorkoutRecord,
+} from '../../lib/db'
+import { dailyNutrition, goalProgress, localDateKey, plannedVsConsumed, roundDisplay } from '../../lib/food'
 import { gymSummary } from '../../lib/gym'
 import { aggregateCompletion, calculateStreaks, mascotProgress } from '../../lib/habits'
 import { scheduledProgress } from '../../lib/tasks'
@@ -20,6 +32,11 @@ interface WidgetBodyProps {
   habits: HabitRecord[]
   habitLogs: HabitLogRecord[]
   workouts: WorkoutRecord[]
+  foods: FoodRecord[]
+  mealEntries: MealEntryRecord[]
+  mealPlans: MealPlanRecord[]
+  nutritionGoals: NutritionGoalRecord[]
+  recipes?: RecipeRecord[]
   appearance: Appearance
   onToggleTask: (id: string) => void
   onSaved: () => void
@@ -30,7 +47,22 @@ function placeholder(widget: WidgetConfig, t: Translate) {
   return <EmptyState title={t(definition.nameKey)} body={t(definition.noteKey)} />
 }
 
-export function WidgetBody({ widget, t, tasks, habits, habitLogs, workouts, appearance, onToggleTask, onSaved }: WidgetBodyProps) {
+export function WidgetBody({
+  widget,
+  t,
+  tasks,
+  habits,
+  habitLogs,
+  workouts,
+  foods,
+  mealEntries,
+  mealPlans,
+  nutritionGoals,
+  recipes = [],
+  appearance,
+  onToggleTask,
+  onSaved,
+}: WidgetBodyProps) {
   const open = tasks.filter((task) => !task.completed)
   const progress = scheduledProgress(tasks)
   const palette = chartPalettes[appearance.preset as PresetId][resolveColorMode(appearance.mode)]
@@ -140,6 +172,58 @@ export function WidgetBody({ widget, t, tasks, habits, habitLogs, workouts, appe
         <p className="eyebrow" style={{ color: 'var(--mf-module-accent)' }}>{t(`mascotStage${mascot.stage[0].toUpperCase()}${mascot.stage.slice(1)}` as TranslationKey)}</p>
         <ProgressBar value={mascot.percent} label={`${mascot.completedDays} / ${mascot.nextThreshold}`} />
         <p className="muted text-xs">{t('mascotProgressNote')}</p>
+      </div>
+    )
+  }
+
+  if (widget.id === 'foodOverview') {
+    const today = localDateKey(new Date())
+    const todayEntries = mealEntries.filter((entry) => entry.localDate === today)
+    if (todayEntries.length === 0) {
+      return <EmptyState title={t('widgetFood')} body={t('foodNoEntries')} />
+    }
+    const consumed = dailyNutrition(todayEntries, today, foods, recipes)
+    const todayPlans = mealPlans.filter((plan) => plan.localDate === today)
+    const planned = plannedVsConsumed(todayPlans, todayEntries, today, foods, recipes).planned
+    const goal = nutritionGoals.find((item) => item.localDate === today) ?? null
+    const progress = goalProgress(consumed, goal)
+    return (
+      <div className="space-y-2">
+        <p className="stat-number" style={{ color: 'var(--mf-module-accent)' }}>
+          {roundDisplay(consumed.calories)} {t('foodUnitKcal')}
+        </p>
+        <p className="muted text-xs">
+          {t('recordsCount')}: {todayEntries.length} · {t('foodPlanned')}: {roundDisplay(planned.calories)} {t('foodUnitKcal')}
+        </p>
+        {progress.available ? (
+          <div className="space-y-1">
+            <div className="flex flex-wrap justify-between gap-2 text-xs">
+              <span>{t('foodGoalProgress')}</span>
+              <span className="muted">
+                {roundDisplay(progress.percent ?? 0)}%{progress.overGoal ? ` · ${t('foodOverGoal')}` : ''}
+              </span>
+            </div>
+            <div
+              className="h-2 overflow-hidden rounded-pill"
+              style={{ backgroundColor: 'var(--mf-surfaceAlt)' }}
+              role="progressbar"
+              aria-label={t('foodGoalProgress')}
+              aria-valuemin={0}
+              aria-valuemax={goal?.calories ?? 0}
+              aria-valuenow={roundDisplay(consumed.calories)}
+            >
+              <div
+                className="h-full rounded-pill"
+                style={{
+                  width: `${Math.min(100, Math.max(0, progress.percent ?? 0))}%`,
+                  backgroundColor: progress.overGoal ? 'var(--mf-danger)' : 'var(--mf-growth)',
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="muted text-xs">{t('foodNoGoal')}</p>
+        )}
       </div>
     )
   }

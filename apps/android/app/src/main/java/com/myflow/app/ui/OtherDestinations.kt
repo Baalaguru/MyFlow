@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.myflow.app.R
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.FoodRepository
 import com.myflow.app.data.GymRepository
 import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.TaskRepository
@@ -42,11 +44,15 @@ import com.myflow.app.data.WorkoutExerciseWithSets
 import com.myflow.app.data.WidgetIds
 import com.myflow.app.data.aggregateHabitCompletion
 import com.myflow.app.data.calculateHabitStreaks
+import com.myflow.app.data.foodSummary
 import com.myflow.app.data.mascotProgress
 import com.myflow.app.data.progressForTasks
+import com.myflow.app.data.round1
+import java.time.LocalDate
 import kotlinx.coroutines.launch
 import com.myflow.app.ui.navigation.AppDestinations
 import com.myflow.app.ui.theme.GeneratedTokens
+import com.myflow.app.ui.workspaces.EmptyState
 import com.myflow.app.ui.workspaces.ModuleHeader
 import com.myflow.app.ui.workspaces.ModuleStats
 import com.myflow.app.ui.workspaces.ProgressStrip
@@ -96,7 +102,13 @@ private fun <T> List<T>.swapped(first: Int, second: Int): List<T> = toMutableLis
 }
 
 @Composable
-fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository, habits: HabitRepository, gym: GymRepository) {
+fun DashboardScreen(
+    repository: TaskRepository,
+    dashboards: DashboardRepository,
+    habits: HabitRepository,
+    gym: GymRepository,
+    food: FoodRepository,
+) {
     val tasks by repository.observeTasks().collectAsState(initial = emptyList())
     val rows by dashboards.observe().collectAsState(initial = emptyList())
     val habitRows by habits.observeHabits().collectAsState(initial = emptyList())
@@ -104,6 +116,11 @@ fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository,
     val gymWorkouts by gym.observeWorkouts().collectAsState(initial = emptyList())
     val gymExercises by gym.observeExercises().collectAsState(initial = emptyList())
     val gymPrs by gym.observePersonalRecords().collectAsState(initial = emptyList())
+    val foodEntries by food.observeEntries().collectAsState(initial = emptyList())
+    val foodPlans by food.observePlans().collectAsState(initial = emptyList())
+    val foodFoods by food.observeFoods().collectAsState(initial = emptyList())
+    val foodGoals by food.observeGoals().collectAsState(initial = emptyList())
+    val foodRecipes by food.observeRecipeAggregates().collectAsState(initial = emptyList())
     var gymAggregates by remember { mutableStateOf<List<WorkoutAggregate>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
@@ -327,6 +344,52 @@ fun DashboardScreen(repository: TaskRepository, dashboards: DashboardRepository,
                         else "${summary.workoutCount} · ${summary.totalVolume.toInt()} vol · ${summary.prCount} PRs",
                         style = MaterialTheme.typography.titleMedium,
                     )
+                }
+                if (widget.id == WidgetIds.FOOD_OVERVIEW) {
+                    val today = LocalDate.now()
+                    val summary = foodSummary(
+                        foodEntries,
+                        foodPlans,
+                        foodGoals.firstOrNull { it.localDate == today.toString() },
+                        today,
+                        foodFoods,
+                        foodRecipes,
+                    )
+                    if (summary.entryCount == 0) {
+                        EmptyState(
+                            title = stringResource(R.string.empty_title),
+                            body = stringResource(R.string.food_no_entries),
+                        )
+                    } else {
+                        Text(
+                            text = "${summary.nutrition.calories.round1()} ${stringResource(R.string.food_unit_kcal)} · ${summary.entryCount}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = when {
+                                !summary.progress.available -> stringResource(R.string.food_no_goal)
+                                summary.progress.overGoal -> stringResource(R.string.food_over_goal)
+                                else -> stringResource(R.string.food_goal_met)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (summary.progress.overGoal) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
+                        summary.progress.percent?.let { percent ->
+                            LinearProgressIndicator(
+                                progress = { (percent.coerceAtMost(100) / 100f) },
+                                modifier = Modifier.fillMaxWidth(),
+                                color = if (summary.progress.overGoal) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                            )
+                        }
+                    }
                 }
                 if (widget.id == WidgetIds.WEEKLY_STATISTICS || widget.id == WidgetIds.MONTHLY_STATISTICS) {
                     val days = if (widget.id == WidgetIds.WEEKLY_STATISTICS) 7 else 30

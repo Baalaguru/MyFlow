@@ -55,4 +55,5 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.25")
+    testImplementation("com.google.code.gson:gson:2.11.0")
 }

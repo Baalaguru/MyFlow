@@ -41,7 +41,7 @@ export const widgetRegistry: Record<WidgetId, WidgetDefinition> = {
   walkingOverview: { id: 'walkingOverview', nameKey: 'widgetWalking', noteKey: 'widgetNoteWalking', available: false, columns: 4, rows: 1 },
   jumpRopeOverview: { id: 'jumpRopeOverview', nameKey: 'widgetJumpRope', noteKey: 'widgetNoteJumpRope', available: false, columns: 4, rows: 1 },
   cyclingOverview: { id: 'cyclingOverview', nameKey: 'widgetCycling', noteKey: 'widgetNoteCycling', available: false, columns: 4, rows: 1 },
-  foodOverview: { id: 'foodOverview', nameKey: 'widgetFood', noteKey: 'widgetNoteFood', available: false, columns: 4, rows: 1 },
+  foodOverview: { id: 'foodOverview', nameKey: 'widgetFood', noteKey: 'widgetNoteFood', available: true, columns: 4, rows: 1 },
   readingOverview: { id: 'readingOverview', nameKey: 'widgetReading', noteKey: 'widgetNoteDeferred', available: false, columns: 4, rows: 1 },
   journalQuickAccess: { id: 'journalQuickAccess', nameKey: 'widgetJournal', noteKey: 'widgetNoteDeferred', available: false, columns: 4, rows: 1 },
   calendarOverview: { id: 'calendarOverview', nameKey: 'widgetCalendar', noteKey: 'widgetNoteDeferred', available: false, columns: 4, rows: 1 },

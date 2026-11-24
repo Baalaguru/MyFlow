@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://myflow.local/contracts/schemas/food.schema.json",
+  "title": "Food",
+  "description": "Canonical food record. Nutrition values are per serving; sourceRef is reserved for a deferred provider.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "servingSize", "calories", "protein", "carbs", "fat", "source", "createdAt", "updatedAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "servingSize": { "type": "string", "minLength": 1 },
+    "servingGrams": { "type": "number", "minimum": 0 },
+    "calories": { "type": "number", "minimum": 0 },
+    "protein": { "type": "number", "minimum": 0 },
+    "carbs": { "type": "number", "minimum": 0 },
+    "fat": { "type": "number", "minimum": 0 },
+    "source": { "type": "string", "enum": ["manual", "import"] },
+    "sourceRef": { "type": ["string", "null"] },
+    "imageRef": { "type": ["string", "null"], "description": "Attachment reference only; bytes are never embedded." },
+    "notes": { "type": ["string", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

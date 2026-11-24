@@ -57,6 +57,7 @@ import com.myflow.app.R
 import com.myflow.app.data.AppDatabase
 import com.myflow.app.data.DashboardLabels
 import com.myflow.app.data.DashboardRepository
+import com.myflow.app.data.FoodRepository
 import com.myflow.app.data.GymRepository
 import com.myflow.app.data.HabitRepository
 import com.myflow.app.data.SearchResult
@@ -116,6 +117,9 @@ fun MyFlowApp(startIntent: Intent? = null) {
     val gymRepository = remember(context.applicationContext) {
         GymRepository(AppDatabase.get(context.applicationContext).gymDao())
     }
+    val foodRepository = remember(context.applicationContext) {
+        FoodRepository(AppDatabase.get(context.applicationContext).foodDao())
+    }
     val darkMode = isSystemInDarkTheme()
     val presetId = GeneratedTokens.presetIds.first()
     val fontPreference = GeneratedTokens.fontPreferenceIds.first()
@@ -134,6 +138,7 @@ fun MyFlowApp(startIntent: Intent? = null) {
                 dashboardRepository = dashboardRepository,
                 habitRepository = habitRepository,
                 gymRepository = gymRepository,
+                foodRepository = foodRepository,
                 startIntent = startIntent,
             )
         }
@@ -146,6 +151,7 @@ private fun AppShell(
     dashboardRepository: DashboardRepository,
     habitRepository: HabitRepository,
     gymRepository: GymRepository,
+    foodRepository: FoodRepository,
     startIntent: Intent?,
 ) {
     val navController = rememberNavController()
@@ -339,6 +345,7 @@ private fun AppShell(
                 dashboards = dashboardRepository,
                 habits = habitRepository,
                 gym = gymRepository,
+                food = foodRepository,
                 modifier = Modifier.padding(padding),
             )
         }

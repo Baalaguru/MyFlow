@@ -23,6 +23,43 @@ for (const key of enKeys) {
   if (typeof ta[key] !== 'string' || ta[key].trim() === '') errors.push(`Empty Tamil string: ${key}`)
 }
 
+const schemaPaths = [
+  'contracts/schemas/entity-base.schema.json',
+  'contracts/schemas/gym-exercise.schema.json',
+  'contracts/schemas/food.schema.json',
+  'contracts/schemas/meal-entry.schema.json',
+  'contracts/schemas/meal-plan.schema.json',
+  'contracts/schemas/recipe.schema.json',
+  'contracts/schemas/nutrition-goal.schema.json',
+]
+for (const path of schemaPaths) {
+  try {
+    const schema = read(path)
+    if (schema.type !== 'object') errors.push(`Schema is not an object: ${path}`)
+  } catch {
+    errors.push(`Missing or invalid JSON schema: ${path}`)
+  }
+}
+
+const foodFixtureRules = [
+  'food.entry.nutrition',
+  'recipe.perServing',
+  'daily.nutrition',
+  'goal.progress',
+  'meal.distribution',
+  'planned.vs.consumed',
+  'goal.progress.unavailable',
+]
+try {
+  const fixture = read('contracts/fixtures/food.nutrition.json')
+  const rules = (fixture.cases ?? []).map((item) => item.rule)
+  for (const rule of foodFixtureRules) {
+    if (!rules.includes(rule)) errors.push(`Missing shared food fixture case: ${rule}`)
+  }
+} catch {
+  errors.push('Missing or invalid contracts/fixtures/food.nutrition.json')
+}
+
 const luminance = (hex) => {
   const channel = (start) => {
     const value = parseInt(hex.slice(start, start + 2), 16) / 255

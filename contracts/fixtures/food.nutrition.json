@@ -1,0 +1,129 @@
+{
+  "cases": [
+    {
+      "rule": "food.entry.nutrition",
+      "case": "food quantity scales all nutrition values",
+      "input": {
+        "foods": [
+          { "id": "oats", "calories": 380, "protein": 13, "carbs": 67, "fat": 6 }
+        ],
+        "recipes": [],
+        "entries": [
+          { "id": "e1", "localDate": "2026-11-24", "mealType": "breakfast", "foodId": "oats", "quantity": 1.5 }
+        ]
+      },
+      "expected": { "calories": 570, "protein": 19.5, "carbs": 100.5, "fat": 9 }
+    },
+    {
+      "rule": "recipe.perServing",
+      "case": "recipe ingredients are scaled by servings and entry quantity",
+      "input": {
+        "foods": [
+          { "id": "oats", "calories": 380, "protein": 13, "carbs": 67, "fat": 6 },
+          { "id": "yogurt", "calories": 100, "protein": 10, "carbs": 8, "fat": 0 }
+        ],
+        "recipes": [
+          {
+            "id": "bowl",
+            "servings": 2,
+            "ingredients": [
+              { "foodId": "oats", "quantity": 1 },
+              { "foodId": "yogurt", "quantity": 2 }
+            ]
+          }
+        ],
+        "entries": [
+          { "id": "e2", "localDate": "2026-11-24", "mealType": "snack", "recipeId": "bowl", "quantity": 1.5 }
+        ]
+      },
+      "expected": { "perServing": { "calories": 290, "protein": 16.5, "carbs": 41.5, "fat": 3 }, "entry": { "calories": 435, "protein": 24.75, "carbs": 62.25, "fat": 4.5 } }
+    },
+    {
+      "rule": "daily.nutrition",
+      "case": "daily total sums food and recipe entries by local date",
+      "input": {
+        "foods": [
+          { "id": "oats", "calories": 380, "protein": 13, "carbs": 67, "fat": 6 },
+          { "id": "chicken", "calories": 200, "protein": 40, "carbs": 0, "fat": 8 },
+          { "id": "yogurt", "calories": 100, "protein": 10, "carbs": 8, "fat": 0 }
+        ],
+        "recipes": [
+          {
+            "id": "bowl",
+            "servings": 2,
+            "ingredients": [
+              { "foodId": "oats", "quantity": 1 },
+              { "foodId": "yogurt", "quantity": 2 }
+            ]
+          }
+        ],
+        "entries": [
+          { "id": "e1", "localDate": "2026-11-24", "mealType": "breakfast", "foodId": "oats", "quantity": 1 },
+          { "id": "e3", "localDate": "2026-11-24", "mealType": "lunch", "foodId": "chicken", "quantity": 2 },
+          { "id": "e4", "localDate": "2026-11-24", "mealType": "snack", "recipeId": "bowl", "quantity": 1 },
+          { "id": "e5", "localDate": "2026-11-23", "mealType": "dinner", "foodId": "chicken", "quantity": 5 }
+        ]
+      },
+      "expected": { "calories": 1070, "protein": 109.5, "carbs": 108.5, "fat": 25 }
+    },
+    {
+      "rule": "goal.progress",
+      "case": "over-goal progress is reported above one and not clamped",
+      "input": {
+        "consumed": { "calories": 1270, "protein": 109.5, "carbs": 108.5, "fat": 25 },
+        "goal": { "calories": 1000, "protein": 120, "carbs": 150, "fat": 40 }
+      },
+      "expected": { "available": true, "ratio": 1.27, "percent": 127, "overGoal": true }
+    },
+    {
+      "rule": "meal.distribution",
+      "case": "meal category distribution uses calories by meal type",
+      "input": {
+        "foods": [
+          { "id": "oats", "calories": 380, "protein": 13, "carbs": 67, "fat": 6 },
+          { "id": "chicken", "calories": 200, "protein": 40, "carbs": 0, "fat": 8 },
+          { "id": "yogurt", "calories": 100, "protein": 10, "carbs": 8, "fat": 0 }
+        ],
+        "recipes": [
+          { "id": "bowl", "servings": 2, "ingredients": [{ "foodId": "oats", "quantity": 1 }, { "foodId": "yogurt", "quantity": 2 }] }
+        ],
+        "entries": [
+          { "id": "e1", "localDate": "2026-11-24", "mealType": "breakfast", "foodId": "oats", "quantity": 1 },
+          { "id": "e3", "localDate": "2026-11-24", "mealType": "lunch", "foodId": "chicken", "quantity": 2 },
+          { "id": "e4", "localDate": "2026-11-24", "mealType": "snack", "recipeId": "bowl", "quantity": 1 }
+        ]
+      },
+      "expected": { "breakfast": 380, "lunch": 400, "dinner": 0, "snack": 290 }
+    },
+    {
+      "rule": "planned.vs.consumed",
+      "case": "plans are compared separately with consumed entries",
+      "input": {
+        "foods": [
+          { "id": "oats", "calories": 380, "protein": 13, "carbs": 67, "fat": 6 },
+          { "id": "chicken", "calories": 200, "protein": 40, "carbs": 0, "fat": 8 }
+        ],
+        "recipes": [],
+        "entries": [
+          { "id": "e1", "localDate": "2026-11-24", "mealType": "breakfast", "foodId": "oats", "quantity": 1 },
+          { "id": "e3", "localDate": "2026-11-24", "mealType": "lunch", "foodId": "chicken", "quantity": 2 }
+        ],
+        "plans": [
+          { "id": "p1", "localDate": "2026-11-24", "mealType": "breakfast", "foodId": "oats", "quantity": 1 },
+          { "id": "p2", "localDate": "2026-11-24", "mealType": "lunch", "foodId": "chicken", "quantity": 2 },
+          { "id": "p3", "localDate": "2026-11-25", "mealType": "dinner", "foodId": "chicken", "quantity": 1 }
+        ]
+      },
+      "expected": { "planned": { "calories": 780, "protein": 93, "carbs": 67, "fat": 22 }, "consumed": { "calories": 780, "protein": 93, "carbs": 67, "fat": 22 } }
+    },
+    {
+      "rule": "goal.progress.unavailable",
+      "case": "missing goal is unavailable and never divided by zero",
+      "input": {
+        "consumed": { "calories": 500, "protein": 20, "carbs": 60, "fat": 10 },
+        "goal": null
+      },
+      "expected": { "available": false, "ratio": null, "percent": null, "overGoal": false }
+    }
+  ]
+}

@@ -89,26 +89,7 @@ private fun PlanColumn(label: String, value: String, modifier: Modifier = Modifi
     }
 }
 
-@Composable
-fun FoodWorkspace() {
-    val notRecorded = stringResource(R.string.not_recorded)
-    EmptyModuleWorkspace(
-        routeId = AppDestinations.FOOD,
-        titleRes = R.string.nav_food,
-        subtitleRes = R.string.workspace_subtitle_food,
-    ) {
-        SectionCard(title = stringResource(R.string.food_meals_label)) {
-            ValueRow(label = stringResource(R.string.food_breakfast), value = notRecorded)
-            ValueRow(label = stringResource(R.string.food_lunch), value = notRecorded)
-            ValueRow(label = stringResource(R.string.food_dinner), value = notRecorded)
-            Text(
-                text = stringResource(R.string.module_empty_food),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
+// FoodWorkspace is implemented in FoodWorkspace.kt with a real FoodRepository.
 
 @Composable
 fun CardioWorkspace() {

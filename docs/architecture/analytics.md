@@ -25,8 +25,12 @@ All statistics are derived from source records in the local database. No table s
 | Gym | Workout volume | Sum of all completed set volumes in the workout; unfinished sets contribute zero. |
 | Gym | Personal record | Highest completed value for an exercise/metric in its history; ties keep the earliest date. |
 | Gym | Progressive overload | Comparison of a set/exercise's volume or weight against its immediately preceding completed occurrence, using correct historical order. |
-| Food | Daily nutrition | Sum of logged entries by local date and meal type; recipe servings scale ingredient nutrition by quantity. |
-| Food | Goal progress | Consumed ÷ goal for calories/protein/carbs/fat; over-goal is shown as a distinct state, not clamped. |
+| Food | Entry nutrition | Food values are per serving and multiply by entry quantity (servings). Recipe nutrition per serving is `sum(ingredient quantity × food per-serving value) / recipe servings`; a recipe entry multiplies that by entry quantity. |
+| Food | Daily nutrition | Sum of logged entries by local date and meal type. Empty days are explicit empty states, never zero-valued charts. |
+| Food | Planned versus consumed | `MealPlan` rows and `MealEntry` rows are summed separately for the same local date; no plan is inferred from a consumed entry. |
+| Food | Meal distribution | Share of calories by breakfast/lunch/dinner/snack; denominator is total calories in the selected range, and a zero total yields an empty state. |
+| Food | Food trends | Daily, weekly, and monthly series sum calories/protein/carbs/fat over local dates using the shared boundary rules. |
+| Food | Goal progress | Consumed ÷ goal for calories/protein/carbs/fat; a missing or zero goal is unavailable. Over-goal is shown as a distinct state, not clamped. |
 | Cardio | Steps | Sum of deduplicated `StepRecord` values for the local date; multiple sources never double-count. |
 | Cardio | Cycling speed | Distance ÷ moving time, excluding pauses and stationary periods; max speed only from accepted GPS points. |
 | Cardio | Jump rope | Jump count as recorded; sensor-assisted counts labelled with source and never presented as verified measurement. |

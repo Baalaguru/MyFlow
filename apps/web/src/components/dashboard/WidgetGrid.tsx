@@ -1,7 +1,18 @@
 import { useState, type CSSProperties, type DragEvent } from 'react'
 import type { TranslationKey } from '../../i18n'
 import type { Appearance } from '../../lib/appearance'
-import type { HabitLogRecord, HabitRecord, TaskRecord, WidgetConfig, WorkoutRecord } from '../../lib/db'
+import type {
+  FoodRecord,
+  HabitLogRecord,
+  HabitRecord,
+  MealEntryRecord,
+  MealPlanRecord,
+  NutritionGoalRecord,
+  RecipeRecord,
+  TaskRecord,
+  WidgetConfig,
+  WorkoutRecord,
+} from '../../lib/db'
 import { widgetRegistry } from '../../lib/widgets'
 import { IconButton } from '../ui'
 import { WidgetBody } from './WidgetBody'
@@ -17,6 +28,11 @@ export interface WidgetGridProps {
   habits: HabitRecord[]
   habitLogs: HabitLogRecord[]
   workouts: WorkoutRecord[]
+  foods: FoodRecord[]
+  mealEntries: MealEntryRecord[]
+  mealPlans: MealPlanRecord[]
+  nutritionGoals: NutritionGoalRecord[]
+  recipes?: RecipeRecord[]
   appearance: Appearance
   onToggleTask: (id: string) => void
   onSaved: () => void
@@ -36,6 +52,11 @@ export function WidgetGrid({
   habits,
   habitLogs,
   workouts,
+  foods,
+  mealEntries,
+  mealPlans,
+  nutritionGoals,
+  recipes = [],
   appearance,
   onToggleTask,
   onSaved,
@@ -116,6 +137,11 @@ export function WidgetGrid({
                   habits={habits}
                   habitLogs={habitLogs}
                   workouts={workouts}
+                  foods={foods}
+                  mealEntries={mealEntries}
+                  mealPlans={mealPlans}
+                  nutritionGoals={nutritionGoals}
+                  recipes={recipes}
                   appearance={appearance}
                   onToggleTask={onToggleTask}
                   onSaved={onSaved}
