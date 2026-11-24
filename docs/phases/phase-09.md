@@ -5,7 +5,7 @@ Accepted decision: [ADR-0025](../adr/0025-food-and-nutrition-tracker.md).
 
 - **Run timestamp:** 2026-11-24T13:59:06Z, final full smoke run
 - **Build version:** 0.1.0 (web `package.json`, Android `versionName`, API health response)
-- **Commit scope:** Phase 9 was implemented on `phase/09-food-nutrition`, based on `e59a3b8`, then merged to `develop` and pushed to `origin/develop` as the Phase 9 commit.
+- **Commit scope:** Phase 9 was implemented on `phase/09-food-nutrition`, based on `e59a3b8`, then merged to `develop` and pushed to `origin/develop` as `9c0dd24`.
 - **Host:** Windows 11, Node v24.11.1, npm 11.6.2, Docker Engine 29.9.2, JDK 21 Temurin, Gradle 8.9
 - **Browser:** OpenCode in-app browser (Chromium), `http://127.0.0.1:5173/#/food`
 - **Device/emulator:** Android Emulator `emulator-5554` (`myflow_api35`, sdk_gphone64_x86_64, Android 15/API 35). Emulator was restarted before the final Android runtime gate; no app crash was observed in the filtered logcat.
