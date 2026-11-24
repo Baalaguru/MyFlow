@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://myflow.local/contracts/schemas/gym-exercise.schema.json",
+  "title": "GymExercise",
+  "description": "Canonical gym exercise contract. muscleGroups is the sync/API field; muscleGroup is legacy read compatibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "muscleGroups", "isCustom", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "muscleGroups": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["chest", "back", "legs", "shoulders", "arms", "core", "fullBody", "other"]
+      }
+    },
+    "muscleGroup": {
+      "type": "string",
+      "enum": ["chest", "back", "legs", "shoulders", "arms", "core", "fullBody", "other"],
+      "description": "Legacy single-group field for backward compatibility. Prefer muscleGroups."
+    },
+    "notes": { "type": "string" },
+    "isCustom": { "type": "boolean" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

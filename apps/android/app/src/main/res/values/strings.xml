@@ -386,4 +386,15 @@
     <string name="mascot_neutral_missed">Taking a quiet day is okay. Your progress is still here when you return.</string>
     <string name="mascot_no_habits">Add a habit to begin growing your companion.</string>
     <string name="mascot_progress_note">Growth is based on completed habit days and never goes backward after missed days.</string>
+    <string name="gym_pr_graph_label">Max weight PR by exercise</string>
+    <string name="gym_muscle_chest">Chest</string>
+    <string name="gym_muscle_back">Back</string>
+    <string name="gym_muscle_legs">Legs</string>
+    <string name="gym_muscle_shoulders">Shoulders</string>
+    <string name="gym_muscle_arms">Arms</string>
+    <string name="gym_muscle_core">Core</string>
+    <string name="gym_muscle_full_body">Full body</string>
+    <string name="gym_muscle_other">Other</string>
+    <string name="gym_exercise_removed">Exercise removed.</string>
+    <string name="gym_exercise_in_use">Cannot delete an exercise used in workouts.</string>
 </resources>

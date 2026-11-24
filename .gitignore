@@ -31,6 +31,9 @@ server/bin/
 deployments/backups/
 *.bak
 
+# Local gate artifacts / reports
+docs/reports/
+
 # OS / editor
 .DS_Store
 Thumbs.db

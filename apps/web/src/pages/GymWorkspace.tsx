@@ -109,10 +109,18 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
   }
 
   const mutate = async (fn: () => Promise<void>, msg: TranslationKey) => {
-    await fn()
-    await load()
-    onSaved()
-    notify(msg)
+    try {
+      await fn()
+      await load()
+      onSaved()
+      notify(msg)
+    } catch (e) {
+      if (e instanceof Error && e.message === 'in-use') {
+        notify('gymExerciseInUse')
+        return
+      }
+      throw e
+    }
   }
 
   if (problem) {
@@ -171,7 +179,7 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
         <section className="panel p-4 space-y-3">
           <div>
             <p className="eyebrow">{t('gymPRs')}</p>
-            <p className="muted text-sm">Max weight PR by exercise</p>
+            <p className="muted text-sm">{t('gymPRGraphLabel')}</p>
           </div>
           <div className="space-y-2">
             {prByExercise.map((pr) => {
@@ -348,7 +356,10 @@ export function GymWorkspace({ t, revision, onSaved }: GymWorkspaceProps) {
                   <span className="truncate">{ex.name}</span>
                   <IconButton
                     label={t('deleteAction')}
-                    onClick={() => void mutate(async () => { await deleteExercise(ex.id) }, 'gymExerciseRemoved')}
+                    onClick={() => void mutate(async () => {
+                      const ok = await deleteExercise(ex.id)
+                      if (!ok) throw new Error('in-use')
+                    }, 'gymExerciseRemoved')}
                   >
                     ×
                   </IconButton>

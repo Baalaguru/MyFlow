@@ -132,7 +132,7 @@
     <string name="gym_total_volume">மொத்த அளவு</string>
     <string name="gym_prs">சிறந்த சாதனைகள்</string>
     <string name="gym_no_workouts">இன்னும் பயிற்சிகள் பதிவு செய்யப்படவில்லை.</string>
-    <string name="gym_exercises">Exercises</string>
+    <string name="gym_exercises">உட்பியிகள்</string>
     <string name="gym_filter_active">செயலில்</string>
     <string name="gym_filter_completed">நிறைவேற்றியது</string>
     <string name="gym_finish_workout">பயிற்சியை முடி</string>
@@ -386,4 +386,15 @@
     <string name="mascot_neutral_missed">அமைதியான நாள் எடுத்துக்கொள்வது சரி. நீங்கள் திரும்பும்போது உங்கள் முன்னேற்றம் இங்கே இருக்கும்.</string>
     <string name="mascot_no_habits">உங்கள் துணையை வளர்க்க ஒரு பழக்கத்தைச் சேர்க்கவும்.</string>
     <string name="mascot_progress_note">வளர்ச்சி நிறைவேற்றப்பட்ட பழக்க நாட்களை அடிப்படையாகக் கொண்டது; தவறிய நாட்களுக்குப் பிறகு பின்னோக்கி செல்லாது.</string>
+    <string name="gym_pr_graph_label">பயிசியாராக அதிகப்பட எடை சாதனை</string>
+    <string name="gym_muscle_chest">மார்பு</string>
+    <string name="gym_muscle_back">முதுகு</string>
+    <string name="gym_muscle_legs">கால்கள்</string>
+    <string name="gym_muscle_shoulders">தோள்கள்</string>
+    <string name="gym_muscle_arms">கைகள்</string>
+    <string name="gym_muscle_core">வயிற்றுப்பகுதி</string>
+    <string name="gym_muscle_full_body">முழு உடல்</string>
+    <string name="gym_muscle_other">மற்றவை</string>
+    <string name="gym_exercise_removed">உட்பயிய்பி நீக்கப்பட்படு.</string>
+    <string name="gym_exercise_in_use">பயிசிகள் மேயுருப்பட்புழ் உட்பயிய்பி நீக்க முடியு.</string>
 </resources>

@@ -29,15 +29,15 @@ class GymRepository(private val dao: GymDao) {
         }
     }
 
-    suspend fun createExercise(name: String, muscleGroups: String) {
+    suspend fun createExercise(name: String, muscleGroups: List<String>) {
         val trimmed = name.trim()
         if (trimmed.isBlank()) return
-        val groups = muscleGroups.split(',').map { it.trim() }.filter { it.isNotBlank() }.distinct().joinToString(",")
+        val normalized = muscleGroups.map { it.trim() }.filter { it.isNotBlank() }.distinct()
         dao.saveExercise(
             GymExerciseEntity(
                 id = UUID.randomUUID().toString(),
                 name = trimmed,
-                muscleGroup = groups.ifBlank { "other" },
+                muscleGroup = normalized.joinToString(",").ifBlank { "other" },
                 isCustom = true,
                 createdAt = Instant.now().toString(),
             ),

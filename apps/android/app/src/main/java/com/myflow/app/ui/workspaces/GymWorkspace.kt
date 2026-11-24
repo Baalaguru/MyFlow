@@ -53,6 +53,7 @@ fun GymWorkspace(repository: GymRepository) {
     val workouts by repository.observeWorkouts().collectAsState(initial = emptyList())
     val prs by repository.observePersonalRecords().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
+    val appContext = androidx.compose.ui.platform.LocalContext.current
     var aggregates by remember { mutableStateOf<List<WorkoutAggregate>>(emptyList()) }
     var filter by rememberSaveable { mutableStateOf("all") }
     var exerciseName by rememberSaveable { mutableStateOf("") }
@@ -122,13 +123,28 @@ fun GymWorkspace(repository: GymRepository) {
                             onClick = {
                                 exerciseGroups = if (selected) (exerciseGroups - group).ifEmpty { exerciseGroups } else exerciseGroups + group
                             },
-                            label = { Text(group.replaceFirstChar { c -> c.uppercase() }) },
+                            label = {
+                                Text(
+                                    stringResource(
+                                        when (group) {
+                                            "chest" -> R.string.gym_muscle_chest
+                                            "back" -> R.string.gym_muscle_back
+                                            "legs" -> R.string.gym_muscle_legs
+                                            "shoulders" -> R.string.gym_muscle_shoulders
+                                            "arms" -> R.string.gym_muscle_arms
+                                            "core" -> R.string.gym_muscle_core
+                                            "fullBody" -> R.string.gym_muscle_full_body
+                                            else -> R.string.gym_muscle_other
+                                        }
+                                    )
+                                )
+                            },
                         )
                     }
                 }
                 Button(enabled = exerciseName.isNotBlank() && exerciseGroups.isNotEmpty(), onClick = {
                     scope.launch {
-                        repository.createExercise(exerciseName, exerciseGroups.joinToString(","))
+                        repository.createExercise(exerciseName, exerciseGroups.toList())
                         exerciseName = ""
                         exerciseGroups = setOf("chest")
                         showExerciseForm = false
@@ -143,8 +159,13 @@ fun GymWorkspace(repository: GymRepository) {
                             Text(ex.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
                             TextButton(onClick = {
                                 scope.launch {
-                                    repository.deleteExercise(ex.id)
+                                    val ok = repository.deleteExercise(ex.id)
                                     refresh()
+                                    android.widget.Toast.makeText(
+                                        appContext,
+                                        appContext.getString(if (ok) R.string.gym_exercise_removed else R.string.gym_exercise_in_use),
+                                        android.widget.Toast.LENGTH_SHORT,
+                                    ).show()
                                 }
                             }) { Text(stringResource(R.string.delete_action)) }
                         }
@@ -284,6 +305,6 @@ private fun PersonalRecordsGraph(
                 }
             }
         }
-        Text("Max weight PR by exercise", style = MaterialTheme.typography.labelSmall, color = labelColor)
+        Text(stringResource(R.string.gym_pr_graph_label), style = MaterialTheme.typography.labelSmall, color = labelColor)
     }
 }
