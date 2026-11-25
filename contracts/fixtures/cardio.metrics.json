@@ -1,0 +1,139 @@
+{
+  "cases": [
+    {
+      "rule": "cardio.steps.daily",
+      "case": "daily steps use deduplicated sensor records; session rows are not added on top",
+      "input": {
+        "localDate": "2026-11-24",
+        "stepRecords": [
+          { "id": "sr1", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-am", "stepCount": 3000 },
+          { "id": "sr2", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-pm", "stepCount": 2500 },
+          { "id": "sr3", "localDate": "2026-11-24", "source": "session", "sourceEventId": "walk-1", "stepCount": 1200 }
+        ]
+      },
+      "expected": 5500
+    },
+    {
+      "rule": "cardio.steps.dedupe",
+      "case": "a repeated source+localDate+sourceEventId counts once",
+      "input": {
+        "localDate": "2026-11-24",
+        "stepRecords": [
+          { "id": "sr1", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-am", "stepCount": 3000 },
+          { "id": "sr2", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-am", "stepCount": 3000 },
+          { "id": "sr3", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-pm", "stepCount": 2000 }
+        ]
+      },
+      "expected": 5000
+    },
+    {
+      "rule": "cardio.steps.sourcePrecedence",
+      "case": "a manual correction replaces both sensor and session totals for the day",
+      "input": {
+        "localDate": "2026-11-24",
+        "stepRecords": [
+          { "id": "sr1", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-am", "stepCount": 3000 },
+          { "id": "sr2", "localDate": "2026-11-24", "source": "sensor", "sourceEventId": "sensor-pm", "stepCount": 3000 },
+          { "id": "sr3", "localDate": "2026-11-24", "source": "session", "sourceEventId": "walk-1", "stepCount": 1500 },
+          { "id": "sr4", "localDate": "2026-11-24", "source": "manual", "sourceEventId": "manual:2026-11-24", "stepCount": 6500 }
+        ]
+      },
+      "expected": 6500
+    },
+    {
+      "rule": "cardio.steps.unavailable",
+      "case": "a date with no step records is unavailable, not zero",
+      "input": {
+        "localDate": "2026-11-24",
+        "stepRecords": [
+          { "id": "sr1", "localDate": "2026-11-23", "source": "sensor", "sourceEventId": "sensor-am", "stepCount": 4000 }
+        ]
+      },
+      "expected": null
+    },
+    {
+      "rule": "cardio.walking.goalProgress",
+      "case": "8000 steps against a 10000 step goal is 80 percent and not over goal",
+      "input": {
+        "dailySteps": 8000,
+        "stepGoal": { "id": "goal:2026-11-24", "localDate": "2026-11-24", "stepGoal": 10000 }
+      },
+      "expected": { "available": true, "percent": 80, "overGoal": false }
+    },
+    {
+      "rule": "cardio.cycling.averageSpeed",
+      "case": "10 km over 30 minutes of moving time is 20 km/h",
+      "input": {
+        "distanceMeters": 10000,
+        "movingSeconds": 1800
+      },
+      "expected": 20
+    },
+    {
+      "rule": "cardio.cycling.pauseExcluded",
+      "case": "pauses and stationary time are excluded from moving time and average speed",
+      "input": {
+        "durationSeconds": 3600,
+        "pauseSeconds": 600,
+        "stationarySeconds": 600,
+        "distanceMeters": 20000
+      },
+      "expected": { "movingSeconds": 2400, "averageSpeedKmh": 30 }
+    },
+    {
+      "rule": "cardio.cycling.maxSpeed",
+      "case": "max speed uses accepted GPS points only",
+      "input": {
+        "points": [
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:00:00.000Z", "latitude": 12.9716, "longitude": 80.2707, "accuracyMeters": 10, "speedKmh": 30 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:00:00.500Z", "latitude": 12.9717, "longitude": 80.2708, "accuracyMeters": 10, "speedKmh": 60 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:00:12.000Z", "latitude": 12.9725, "longitude": 80.2715, "accuracyMeters": 15, "speedKmh": 42.5 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:00:12.400Z", "latitude": 12.9726, "longitude": 80.2716, "accuracyMeters": 15, "speedKmh": 55 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:00:40.000Z", "latitude": 12.9740, "longitude": 80.2730, "accuracyMeters": 75, "speedKmh": 50 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:01:00.000Z", "latitude": 12.9750, "longitude": 80.2740, "accuracyMeters": 12, "speedKmh": 135 },
+          { "sessionId": "ride-1", "recordedAt": "2026-11-24T09:01:20.000Z", "latitude": null, "longitude": 80.2750, "accuracyMeters": 12, "speedKmh": 70 }
+        ]
+      },
+      "expected": 42.5
+    },
+    {
+      "rule": "cardio.jump.countSource",
+      "case": "sensor-assisted jump counts are advisory and never verified",
+      "input": {
+        "jumpCount": 300,
+        "countSource": "sensor_assisted",
+        "durationSeconds": 1800,
+        "rounds": 6,
+        "restSeconds": 60
+      },
+      "expected": { "jumpCount": 300, "countSource": "sensor_assisted", "verified": false }
+    },
+    {
+      "rule": "cardio.calories.met",
+      "case": "MET estimates use body weight and duration only when both are present",
+      "input": {
+        "bodyWeightKg": 70,
+        "walking": { "durationSeconds": 3600, "bodyWeightKg": 70, "distanceMeters": 5000 },
+        "jumpRope": { "durationSeconds": 1800, "bodyWeightKg": 70, "jumpCount": 300 }
+      },
+      "expected": { "walking": 245, "jumpRope": 413 }
+    },
+    {
+      "rule": "cardio.combined.summary",
+      "case": "combined summary sums known durations and distances and reports unknown calories",
+      "input": {
+        "localDate": "2026-11-24",
+        "walkingSessions": [
+          { "id": "walk-1", "durationSeconds": 1800, "distanceMeters": 5000, "calories": null, "calorieBasis": "unavailable" }
+        ],
+        "jumpRopeSessions": [
+          { "id": "jump-1", "durationSeconds": 1200, "calories": null, "calorieBasis": "unavailable" }
+        ],
+        "cyclingSessions": [
+          { "id": "ride-1", "durationSeconds": 2400, "distanceMeters": 10000, "calories": null }
+        ]
+      },
+      "expected": { "durationSeconds": 5400, "distanceMeters": 15000, "distanceAvailable": true, "caloriesAvailable": false }
+    }
+  ]
+}

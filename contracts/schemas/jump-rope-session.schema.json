@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://myflow.local/contracts/schemas/jump-rope-session.schema.json",
+  "title": "JumpRopeSession",
+  "description": "Jump-rope session. Sensor-assisted counts are advisory and never verified by device validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "localDate", "startedAt", "endedAt", "durationSeconds", "jumpCount", "countSource", "rounds", "restSeconds", "calories", "bodyWeightKg", "calorieBasis", "notes", "createdAt", "updatedAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "localDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "endedAt": { "type": "string", "format": "date-time" },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "jumpCount": { "type": "integer", "minimum": 0 },
+    "countSource": { "type": "string", "enum": ["manual", "sensor_assisted"] },
+    "rounds": { "type": "integer", "minimum": 0 },
+    "restSeconds": { "type": "number", "minimum": 0 },
+    "calories": { "type": ["number", "null"], "minimum": 0 },
+    "bodyWeightKg": { "type": ["number", "null"], "minimum": 0 },
+    "calorieBasis": { "type": "string", "enum": ["manual", "metJumpRope", "unavailable"] },
+    "notes": { "type": ["string", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

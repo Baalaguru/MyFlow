@@ -4,15 +4,21 @@ import type { TranslationKey } from '../../i18n'
 import type { Appearance } from '../../lib/appearance'
 import { resolveColorMode } from '../../lib/appearance'
 import { monthlyTaskSeries, weeklyTaskSeries, hasSeriesData } from '../../lib/analytics'
+import { cyclingSummary, jumpRopeSummary, walkingSummary } from '../../lib/cardio'
 import type {
+  CyclingSessionRecord,
   FoodRecord,
   HabitLogRecord,
   HabitRecord,
+  JumpRopeSessionRecord,
   MealEntryRecord,
   MealPlanRecord,
   NutritionGoalRecord,
   RecipeRecord,
+  StepGoalRecord,
+  StepRecordRecord,
   TaskRecord,
+  WalkingSessionRecord,
   WidgetConfig,
   WorkoutRecord,
 } from '../../lib/db'
@@ -37,6 +43,11 @@ interface WidgetBodyProps {
   mealPlans: MealPlanRecord[]
   nutritionGoals: NutritionGoalRecord[]
   recipes?: RecipeRecord[]
+  walkingSessions: WalkingSessionRecord[]
+  stepRecords: StepRecordRecord[]
+  stepGoals: StepGoalRecord[]
+  jumpRopeSessions: JumpRopeSessionRecord[]
+  cyclingSessions: CyclingSessionRecord[]
   appearance: Appearance
   onToggleTask: (id: string) => void
   onSaved: () => void
@@ -59,6 +70,11 @@ export function WidgetBody({
   mealPlans,
   nutritionGoals,
   recipes = [],
+  walkingSessions,
+  stepRecords,
+  stepGoals,
+  jumpRopeSessions,
+  cyclingSessions,
   appearance,
   onToggleTask,
   onSaved,
@@ -238,6 +254,85 @@ export function WidgetBody({
           {t('gymTotalVolume')}: {Math.round(summary.totalVolume)} · {t('gymPRs')}: {summary.prCount}
         </p>
         {summary.lastWorkoutAt ? <p className="muted text-xs">{t('gymLastWorkout')}: {new Date(summary.lastWorkoutAt).toLocaleDateString()}</p> : null}
+      </div>
+    )
+  }
+
+  if (widget.id === 'walkingOverview') {
+    const today = localDateKey(new Date())
+    const summary = walkingSummary(
+      walkingSessions,
+      stepRecords,
+      stepGoals.find((goal) => goal.localDate === today)?.stepGoal ?? null,
+      today,
+    )
+    if (summary.sessionCount === 0 && summary.steps === null) {
+      return <EmptyState title={t('widgetWalking')} body={t('widgetNoteWalking')} />
+    }
+    return (
+      <div className="space-y-2">
+        <p className="stat-number" style={{ color: 'var(--mf-module-accent)' }}>
+          {summary.steps === null ? t('notRecorded') : String(summary.steps)}
+        </p>
+        <p className="muted text-xs">
+          {t('cardioDailySteps')} · {t('recordsCount')}: {summary.sessionCount} ·{' '}
+          {t('cardioFieldDistance')}:{' '}
+          {summary.distanceMeters === null ? t('notRecorded') : roundDisplay(summary.distanceMeters)}
+        </p>
+        {summary.goalProgress.available ? (
+          <ProgressBar
+            value={summary.steps ?? 0}
+            max={stepGoals.find((goal) => goal.localDate === today)?.stepGoal ?? 0}
+            label={`${roundDisplay(summary.goalProgress.percent ?? 0)}% ${summary.goalProgress.overGoal ? t('foodOverGoal') : t('foodGoalMet')}`}
+          />
+        ) : (
+          <p className="muted text-xs">{t('noGoalYet')}</p>
+        )}
+      </div>
+    )
+  }
+
+  if (widget.id === 'jumpRopeOverview') {
+    const today = localDateKey(new Date())
+    const summary = jumpRopeSummary(jumpRopeSessions, today)
+    if (summary.sessionCount === 0) {
+      return <EmptyState title={t('widgetJumpRope')} body={t('widgetNoteJumpRope')} />
+    }
+    return (
+      <div className="space-y-2">
+        <p className="stat-number" style={{ color: 'var(--mf-module-accent)' }}>{summary.jumpCount}</p>
+        <p className="muted text-xs">
+          {t('recordsCount')}: {summary.sessionCount} · {t('cardioFieldDuration')}:{' '}
+          {roundDisplay(summary.durationSeconds / 60)}
+        </p>
+        <p className="muted text-xs">
+          {t('foodCalories')}: {summary.calories === null ? t('notRecorded') : roundDisplay(summary.calories)}{' '}
+          {summary.calorieBasis === 'unavailable' ? t('notRecorded') : t('foodAnalyticsNote')}
+        </p>
+      </div>
+    )
+  }
+
+  if (widget.id === 'cyclingOverview') {
+    const today = localDateKey(new Date())
+    const summary = cyclingSummary(cyclingSessions, today)
+    if (summary.sessionCount === 0) {
+      return <EmptyState title={t('widgetCycling')} body={t('widgetNoteCycling')} />
+    }
+    return (
+      <div className="space-y-2">
+        <p className="stat-number" style={{ color: 'var(--mf-module-accent)' }}>
+          {summary.distanceMeters === null ? t('notRecorded') : roundDisplay(summary.distanceMeters)}
+        </p>
+        <p className="muted text-xs">
+          {t('cardioFieldDistance')} · {t('recordsCount')}: {summary.sessionCount} ·{' '}
+          {t('cardioCyclingAvgSpeed')}:{' '}
+          {summary.averageSpeedKmh === null ? t('notRecorded') : roundDisplay(summary.averageSpeedKmh)}
+        </p>
+        <p className="muted text-xs">
+          {t('cardioCyclingMaxSpeed')}:{' '}
+          {summary.maxSpeedKmh === null ? t('notRecorded') : roundDisplay(summary.maxSpeedKmh)}
+        </p>
       </div>
     )
   }

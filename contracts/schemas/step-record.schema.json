@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://myflow.local/contracts/schemas/step-record.schema.json",
+  "title": "StepRecord",
+  "description": "Append-only step record. Unique by (source, localDate, sourceEventId); manual rows correct the day.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "localDate", "stepCount", "source", "sourceEventId", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "localDate": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "stepCount": { "type": "integer", "minimum": 0 },
+    "source": { "type": "string", "enum": ["manual", "sensor", "session"] },
+    "sourceEventId": { "type": "string", "minLength": 1, "description": "Stable event identity within the source; manual corrections use manual:<localDate>." },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

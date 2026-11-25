@@ -31,6 +31,12 @@ const schemaPaths = [
   'contracts/schemas/meal-plan.schema.json',
   'contracts/schemas/recipe.schema.json',
   'contracts/schemas/nutrition-goal.schema.json',
+  'contracts/schemas/walking-session.schema.json',
+  'contracts/schemas/step-record.schema.json',
+  'contracts/schemas/step-goal.schema.json',
+  'contracts/schemas/jump-rope-session.schema.json',
+  'contracts/schemas/cycling-session.schema.json',
+  'contracts/schemas/cycling-location-point.schema.json',
 ]
 for (const path of schemaPaths) {
   try {
@@ -58,6 +64,29 @@ try {
   }
 } catch {
   errors.push('Missing or invalid contracts/fixtures/food.nutrition.json')
+}
+
+const cardioFixtureRules = [
+  'cardio.steps.daily',
+  'cardio.steps.dedupe',
+  'cardio.steps.sourcePrecedence',
+  'cardio.steps.unavailable',
+  'cardio.walking.goalProgress',
+  'cardio.cycling.averageSpeed',
+  'cardio.cycling.pauseExcluded',
+  'cardio.cycling.maxSpeed',
+  'cardio.jump.countSource',
+  'cardio.calories.met',
+  'cardio.combined.summary',
+]
+try {
+  const fixture = read('contracts/fixtures/cardio.metrics.json')
+  const rules = (fixture.cases ?? []).map((item) => item.rule)
+  for (const rule of cardioFixtureRules) {
+    if (!rules.includes(rule)) errors.push(`Missing shared cardio fixture case: ${rule}`)
+  }
+} catch {
+  errors.push('Missing or invalid contracts/fixtures/cardio.metrics.json')
 }
 
 const luminance = (hex) => {

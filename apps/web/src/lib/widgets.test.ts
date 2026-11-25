@@ -24,6 +24,12 @@ describe('widget contract', () => {
     expect(seedWidgets().every((widget) => widgetRegistry[widget.id].available)).toBe(true)
   })
 
+  it('marks cardio widgets available without seeding them', () => {
+    expect(widgetRegistry.walkingOverview.available).toBe(true)
+    expect(widgetRegistry.jumpRopeOverview.available).toBe(true)
+    expect(widgetRegistry.cyclingOverview.available).toBe(true)
+  })
+
   it('rejects unknown widgets and clamps corrupt layout values', () => {
     expect(normaliseWidgetConfig({ id: 'notAWidget' })).toBeNull()
     expect(normaliseWidgetConfig(null)).toBeNull()

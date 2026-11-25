@@ -55,6 +55,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.myflow.app.R
 import com.myflow.app.data.AppDatabase
+import com.myflow.app.data.CardioRepository
 import com.myflow.app.data.DashboardLabels
 import com.myflow.app.data.DashboardRepository
 import com.myflow.app.data.FoodRepository
@@ -120,6 +121,9 @@ fun MyFlowApp(startIntent: Intent? = null) {
     val foodRepository = remember(context.applicationContext) {
         FoodRepository(AppDatabase.get(context.applicationContext).foodDao())
     }
+    val cardioRepository = remember(context.applicationContext) {
+        CardioRepository(AppDatabase.get(context.applicationContext).cardioDao())
+    }
     val darkMode = isSystemInDarkTheme()
     val presetId = GeneratedTokens.presetIds.first()
     val fontPreference = GeneratedTokens.fontPreferenceIds.first()
@@ -139,6 +143,7 @@ fun MyFlowApp(startIntent: Intent? = null) {
                 habitRepository = habitRepository,
                 gymRepository = gymRepository,
                 foodRepository = foodRepository,
+                cardioRepository = cardioRepository,
                 startIntent = startIntent,
             )
         }
@@ -152,6 +157,7 @@ private fun AppShell(
     habitRepository: HabitRepository,
     gymRepository: GymRepository,
     foodRepository: FoodRepository,
+    cardioRepository: CardioRepository,
     startIntent: Intent?,
 ) {
     val navController = rememberNavController()
@@ -346,6 +352,7 @@ private fun AppShell(
                 habits = habitRepository,
                 gym = gymRepository,
                 food = foodRepository,
+                cardio = cardioRepository,
                 modifier = Modifier.padding(padding),
             )
         }

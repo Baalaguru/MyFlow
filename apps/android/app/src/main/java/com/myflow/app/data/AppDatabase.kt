@@ -7,6 +7,7 @@ import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.migration.Migration
 import androidx.room.PrimaryKey
 import androidx.room.Query
@@ -262,6 +263,182 @@ data class NutritionGoalEntity(
     val fat: Double = 0.0,
     val updatedAt: String,
 )
+
+/** Phase 10 canonical cardio records. Optional measurements stay null when never observed. */
+@Entity(
+    tableName = "walking_sessions",
+    indices = [Index(value = ["localDate"]), Index(value = ["startedAt"])],
+)
+data class WalkingSessionEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val startedAt: String,
+    val endedAt: String,
+    val stepCount: Int = 0,
+    val durationSeconds: Long = 0L,
+    val distanceMeters: Double? = null,
+    val calories: Double? = null,
+    val bodyWeightKg: Double? = null,
+    val calorieBasis: String = "none",
+    val source: String = "manual",
+    val notes: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+/** Append-only step ledger: a (source, localDate, sourceEventId) triple is never overwritten. */
+@Entity(
+    tableName = "step_records",
+    indices = [Index(value = ["source", "localDate", "sourceEventId"], unique = true)],
+)
+data class StepRecordEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val stepCount: Int,
+    val source: String,
+    val sourceEventId: String,
+    val createdAt: String,
+)
+
+@Entity(tableName = "step_goals", indices = [Index(value = ["localDate"])])
+data class StepGoalEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val stepGoal: Int,
+    val updatedAt: String,
+)
+
+@Entity(
+    tableName = "jump_rope_sessions",
+    indices = [Index(value = ["localDate"]), Index(value = ["countSource"])],
+)
+data class JumpRopeSessionEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val startedAt: String,
+    val endedAt: String,
+    val durationSeconds: Long = 0L,
+    val jumpCount: Int = 0,
+    val countSource: String = "manual",
+    val rounds: Int = 0,
+    val restSeconds: Long = 0L,
+    val calories: Double? = null,
+    val bodyWeightKg: Double? = null,
+    val calorieBasis: String = "none",
+    val notes: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+/** GPS samples are consumed live and filtered; no route point table is stored in v1. */
+@Entity(
+    tableName = "cycling_sessions",
+    indices = [Index(value = ["localDate"]), Index(value = ["startedAt"])],
+)
+data class CyclingSessionEntity(
+    @PrimaryKey val id: String,
+    val localDate: String,
+    val startedAt: String,
+    val endedAt: String,
+    val durationSeconds: Long = 0L,
+    val movingSeconds: Long = 0L,
+    val pauseSeconds: Long = 0L,
+    val stationarySeconds: Long = 0L,
+    val distanceMeters: Double? = null,
+    val averageSpeedKmh: Double? = null,
+    val maxSpeedKmh: Double? = null,
+    val sourceQuality: String = "manual",
+    val notes: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+@Dao
+interface CardioDao {
+    @Query("SELECT * FROM walking_sessions ORDER BY startedAt DESC")
+    fun observeWalkingSessions(): Flow<List<WalkingSessionEntity>>
+
+    @Query("SELECT * FROM walking_sessions ORDER BY startedAt DESC")
+    suspend fun walkingSessions(): List<WalkingSessionEntity>
+
+    @Query("SELECT * FROM walking_sessions WHERE id = :id")
+    suspend fun walkingSession(id: String): WalkingSessionEntity?
+
+    @Upsert
+    suspend fun saveWalkingSession(session: WalkingSessionEntity)
+
+    @Query("DELETE FROM walking_sessions WHERE id = :id")
+    suspend fun deleteWalkingSession(id: String)
+
+    @Query("SELECT * FROM step_records ORDER BY localDate ASC, createdAt ASC")
+    fun observeStepRecords(): Flow<List<StepRecordEntity>>
+
+    @Query("SELECT * FROM step_records ORDER BY localDate ASC, createdAt ASC")
+    suspend fun stepRecords(): List<StepRecordEntity>
+
+    @Query("SELECT * FROM step_records WHERE localDate = :localDate")
+    suspend fun stepRecordsForDate(localDate: String): List<StepRecordEntity>
+
+    @Query(
+        "SELECT * FROM step_records WHERE source = :source AND localDate = :localDate " +
+            "AND sourceEventId = :sourceEventId LIMIT 1",
+    )
+    suspend fun stepRecordForEvent(source: String, localDate: String, sourceEventId: String): StepRecordEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertStepRecord(record: StepRecordEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertStepRecords(records: List<StepRecordEntity>)
+
+    @Query("DELETE FROM step_records WHERE id = :id")
+    suspend fun deleteStepRecord(id: String)
+
+    @Query("SELECT * FROM step_goals ORDER BY localDate ASC")
+    fun observeStepGoals(): Flow<List<StepGoalEntity>>
+
+    @Query("SELECT * FROM step_goals ORDER BY localDate ASC")
+    suspend fun stepGoals(): List<StepGoalEntity>
+
+    @Query("SELECT * FROM step_goals WHERE localDate = :localDate LIMIT 1")
+    suspend fun stepGoalForDate(localDate: String): StepGoalEntity?
+
+    @Upsert
+    suspend fun saveStepGoal(goal: StepGoalEntity)
+
+    @Query("DELETE FROM step_goals WHERE id = :id")
+    suspend fun deleteStepGoal(id: String)
+
+    @Query("SELECT * FROM jump_rope_sessions ORDER BY startedAt DESC")
+    fun observeJumpRopeSessions(): Flow<List<JumpRopeSessionEntity>>
+
+    @Query("SELECT * FROM jump_rope_sessions ORDER BY startedAt DESC")
+    suspend fun jumpRopeSessions(): List<JumpRopeSessionEntity>
+
+    @Query("SELECT * FROM jump_rope_sessions WHERE id = :id")
+    suspend fun jumpRopeSession(id: String): JumpRopeSessionEntity?
+
+    @Upsert
+    suspend fun saveJumpRopeSession(session: JumpRopeSessionEntity)
+
+    @Query("DELETE FROM jump_rope_sessions WHERE id = :id")
+    suspend fun deleteJumpRopeSession(id: String)
+
+    @Query("SELECT * FROM cycling_sessions ORDER BY startedAt DESC")
+    fun observeCyclingSessions(): Flow<List<CyclingSessionEntity>>
+
+    @Query("SELECT * FROM cycling_sessions ORDER BY startedAt DESC")
+    suspend fun cyclingSessions(): List<CyclingSessionEntity>
+
+    @Query("SELECT * FROM cycling_sessions WHERE id = :id")
+    suspend fun cyclingSession(id: String): CyclingSessionEntity?
+
+    @Upsert
+    suspend fun saveCyclingSession(session: CyclingSessionEntity)
+
+    @Query("DELETE FROM cycling_sessions WHERE id = :id")
+    suspend fun deleteCyclingSession(id: String)
+}
 
 @Dao
 interface DashboardDao {
@@ -737,6 +914,59 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+/** Adds only Phase 10 cardio tables and indexes. No existing table or row is dropped or rewritten. */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `walking_sessions` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `startedAt` TEXT NOT NULL, " +
+                "`endedAt` TEXT NOT NULL, `stepCount` INTEGER NOT NULL, `durationSeconds` INTEGER NOT NULL, " +
+                "`distanceMeters` REAL, `calories` REAL, `bodyWeightKg` REAL, " +
+                "`calorieBasis` TEXT NOT NULL, `source` TEXT NOT NULL, `notes` TEXT, " +
+                "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_walking_sessions_localDate` ON `walking_sessions` (`localDate`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_walking_sessions_startedAt` ON `walking_sessions` (`startedAt`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `step_records` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `stepCount` INTEGER NOT NULL, " +
+                "`source` TEXT NOT NULL, `sourceEventId` TEXT NOT NULL, `createdAt` TEXT NOT NULL, " +
+                "PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_step_records_source_localDate_sourceEventId` " +
+                "ON `step_records` (`source`, `localDate`, `sourceEventId`)",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `step_goals` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `stepGoal` INTEGER NOT NULL, " +
+                "`updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_step_goals_localDate` ON `step_goals` (`localDate`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `jump_rope_sessions` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `startedAt` TEXT NOT NULL, " +
+                "`endedAt` TEXT NOT NULL, `durationSeconds` INTEGER NOT NULL, `jumpCount` INTEGER NOT NULL, " +
+                "`countSource` TEXT NOT NULL, `rounds` INTEGER NOT NULL, `restSeconds` INTEGER NOT NULL, " +
+                "`calories` REAL, `bodyWeightKg` REAL, `calorieBasis` TEXT NOT NULL, `notes` TEXT, " +
+                "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_jump_rope_sessions_localDate` ON `jump_rope_sessions` (`localDate`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_jump_rope_sessions_countSource` ON `jump_rope_sessions` (`countSource`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `cycling_sessions` (" +
+                "`id` TEXT NOT NULL, `localDate` TEXT NOT NULL, `startedAt` TEXT NOT NULL, " +
+                "`endedAt` TEXT NOT NULL, `durationSeconds` INTEGER NOT NULL, `movingSeconds` INTEGER NOT NULL, " +
+                "`pauseSeconds` INTEGER NOT NULL, `stationarySeconds` INTEGER NOT NULL, " +
+                "`distanceMeters` REAL, `averageSpeedKmh` REAL, `maxSpeedKmh` REAL, " +
+                "`sourceQuality` TEXT NOT NULL, `notes` TEXT, " +
+                "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_cycling_sessions_localDate` ON `cycling_sessions` (`localDate`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_cycling_sessions_startedAt` ON `cycling_sessions` (`startedAt`)")
+    }
+}
+
 @Database(
     entities = [
         SettingEntity::class, TaskEntity::class, DashboardEntity::class,
@@ -746,8 +976,10 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         FoodEntity::class, MealEntryEntity::class, MealPlanEntity::class,
         RecipeEntity::class, RecipeIngredientEntity::class, RecipeStepEntity::class,
         NutritionGoalEntity::class,
+        WalkingSessionEntity::class, StepRecordEntity::class, StepGoalEntity::class,
+        JumpRopeSessionEntity::class, CyclingSessionEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 @TypeConverters(TaskJsonConverters::class)
@@ -758,6 +990,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun habitDao(): HabitDao
     abstract fun gymDao(): GymDao
     abstract fun foodDao(): FoodDao
+    abstract fun cardioDao(): CardioDao
 
     companion object {
         @Volatile
@@ -773,6 +1006,7 @@ abstract class AppDatabase : RoomDatabase() {
                     .addMigrations(
                         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
                         MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
+                        MIGRATION_7_8,
                     )
                     .build().also { instance = it }
             }

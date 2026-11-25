@@ -6,7 +6,7 @@ import type { TranslationKey } from '../i18n'
 import { routeLabelKeys, type RouteId } from '../lib/routes'
 import { unavailableProgress } from '../lib/progress'
 
-export type EmptyModuleRoute = Extract<RouteId, 'habits' | 'mascot' | 'cardio' | 'finance'>
+export type EmptyModuleRoute = Extract<RouteId, 'habits' | 'mascot' | 'finance'>
 
 interface EmptyModuleWorkspaceProps {
   route: EmptyModuleRoute
@@ -16,14 +16,12 @@ interface EmptyModuleWorkspaceProps {
 const subtitles: Record<EmptyModuleRoute, TranslationKey> = {
   habits: 'workspaceSubtitleHabits',
   mascot: 'workspaceSubtitleMascot',
-  cardio: 'workspaceSubtitleCardio',
   finance: 'workspaceSubtitleFinance',
 }
 
 const emptyMessages: Record<EmptyModuleRoute, TranslationKey> = {
   habits: 'moduleEmptyHabits',
   mascot: 'moduleEmptyMascot',
-  cardio: 'moduleEmptyCardio',
   finance: 'moduleEmptyFinance',
 }
 
@@ -52,20 +50,6 @@ function WorkspaceBody({ route, t }: EmptyModuleWorkspaceProps) {
         </div>
       )
 
-    case 'cardio':
-      return (
-        <div className="space-y-4">
-          <div className="panel p-6">
-            <div className="flex items-center justify-between" aria-hidden="true">
-              {Array.from({ length: 4 }, (_, index) => (
-                <span key={index} className="h-3 w-3 rounded-pill" style={{ backgroundColor: 'var(--mf-border)' }} />
-              ))}
-            </div>
-            <div className="mt-5 h-2 rounded-pill" style={{ backgroundColor: 'var(--mf-surfaceAlt)' }} />
-          </div>
-          {empty}
-        </div>
-      )
     case 'finance':
       return (
         <div className="space-y-4">

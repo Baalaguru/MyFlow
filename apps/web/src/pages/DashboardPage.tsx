@@ -6,15 +6,20 @@ import type { Appearance } from '../lib/appearance'
 import {
   getSetting,
   setSetting,
+  type CyclingSessionRecord,
   type DashboardRecord,
   type FoodRecord,
+  type JumpRopeSessionRecord,
   type HabitLogRecord,
   type HabitRecord,
   type MealEntryRecord,
   type MealPlanRecord,
   type NutritionGoalRecord,
   type RecipeRecord,
+  type StepGoalRecord,
+  type StepRecordRecord,
   type TaskRecord,
+  type WalkingSessionRecord,
   type WidgetConfig,
   type WorkoutRecord,
 } from '../lib/db'
@@ -33,6 +38,13 @@ import {
   saveWidgetLayout,
   setDefaultDashboard,
 } from '../lib/modules/dashboards'
+import {
+  listCyclingSessions,
+  listJumpRopeSessions,
+  listStepGoals,
+  listStepRecords,
+  listWalkingSessions,
+} from '../lib/modules/cardio'
 import {
   listFoods,
   listMealEntries,
@@ -76,6 +88,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const [mealPlans, setMealPlans] = useState<MealPlanRecord[]>([])
   const [nutritionGoals, setNutritionGoals] = useState<NutritionGoalRecord[]>([])
   const [recipes, setRecipes] = useState<RecipeRecord[]>([])
+  const [walkingSessions, setWalkingSessions] = useState<WalkingSessionRecord[]>([])
+  const [stepRecords, setStepRecords] = useState<StepRecordRecord[]>([])
+  const [stepGoals, setStepGoals] = useState<StepGoalRecord[]>([])
+  const [jumpRopeSessions, setJumpRopeSessions] = useState<JumpRopeSessionRecord[]>([])
+  const [cyclingSessions, setCyclingSessions] = useState<CyclingSessionRecord[]>([])
   const [problem, setProblem] = useState(false)
   const [toast, setToast] = useState<TranslationKey | null>(null)
 
@@ -91,7 +108,8 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const load = useCallback(async () => {
     setProblem(false)
     try {
-      const [rows, storedId, localTasks, localHabits, localLogs, localFoods, localEntries, localPlans, localGoals, localRecipes] = await Promise.all([
+      const [rows, storedId, localTasks, localHabits, localLogs, localFoods, localEntries, localPlans, localGoals, localRecipes,
+        localWalking, localSteps, localStepGoals, localJumpRope, localCycling] = await Promise.all([
         ensureDefaultDashboard(),
         getSetting<string | null>(ACTIVE_KEY, null),
         listTasks(),
@@ -102,6 +120,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
         listMealPlans(),
         listNutritionGoals(),
         listRecipes(),
+        listWalkingSessions(),
+        listStepRecords(),
+        listStepGoals(),
+        listJumpRopeSessions(),
+        listCyclingSessions(),
       ])
       const active = rows.find((row) => row.id === storedId) ?? rows.find((row) => row.isDefault) ?? rows[0]
       setDashboards(rows)
@@ -114,6 +137,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
       setMealPlans(localPlans)
       setNutritionGoals(localGoals)
       setRecipes(localRecipes)
+      setWalkingSessions(localWalking)
+      setStepRecords(localSteps)
+      setStepGoals(localStepGoals)
+      setJumpRopeSessions(localJumpRope)
+      setCyclingSessions(localCycling)
     } catch {
       setProblem(true)
     }
@@ -130,9 +158,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
   const active = dashboards?.find((row) => row.id === activeId) ?? null
 
   const refreshTasks = async () => {
-    const [localTasks, localHabits, localLogs, localWorkouts, localFoods, localEntries, localPlans, localGoals, localRecipes] = await Promise.all([
+    const [localTasks, localHabits, localLogs, localWorkouts, localFoods, localEntries, localPlans, localGoals, localRecipes,
+      localWalking, localSteps, localStepGoals, localJumpRope, localCycling] = await Promise.all([
       listTasks(), listHabits(), listHabitLogs(), listWorkouts(),
       listFoods(), listMealEntries(), listMealPlans(), listNutritionGoals(), listRecipes(),
+      listWalkingSessions(), listStepRecords(), listStepGoals(), listJumpRopeSessions(), listCyclingSessions(),
     ])
     setTasks(localTasks)
     setHabits(localHabits)
@@ -143,6 +173,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
     setMealPlans(localPlans)
     setNutritionGoals(localGoals)
     setRecipes(localRecipes)
+    setWalkingSessions(localWalking)
+    setStepRecords(localSteps)
+    setStepGoals(localStepGoals)
+    setJumpRopeSessions(localJumpRope)
+    setCyclingSessions(localCycling)
     onSaved()
   }
 
@@ -369,6 +404,11 @@ export function DashboardPage({ t, revision, appearance, onSaved }: DashboardPag
         mealPlans={mealPlans}
         nutritionGoals={nutritionGoals}
         recipes={recipes}
+        walkingSessions={walkingSessions}
+        stepRecords={stepRecords}
+        stepGoals={stepGoals}
+        jumpRopeSessions={jumpRopeSessions}
+        cyclingSessions={cyclingSessions}
         appearance={appearance}
         onToggleTask={(id) => void handleToggleTask(id)}
         onSaved={() => void refreshTasks()}

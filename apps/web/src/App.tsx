@@ -12,6 +12,7 @@ import {
   type ColorMode,
 } from './lib/appearance'
 import { moduleRouteIds, type RouteId } from './lib/routes'
+import { CardioWorkspace } from './pages/CardioWorkspace'
 import { DashboardPage } from './pages/DashboardPage'
 import { FoodWorkspace } from './pages/FoodWorkspace'
 import { EmptyModuleWorkspace, type EmptyModuleRoute } from './pages/ModuleWorkspaces'
@@ -29,7 +30,7 @@ const DesignSystemPage = lazy(() =>
 )
 
 const emptyModuleRoutes = moduleRouteIds.filter(
-  (route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot' && route !== 'gym' && route !== 'food',
+  (route) => route !== 'tasks' && route !== 'habits' && route !== 'mascot' && route !== 'gym' && route !== 'food' && route !== 'cardio',
 ) as EmptyModuleRoute[]
 
 function isEmptyModuleRoute(route: RouteId): route is EmptyModuleRoute {
@@ -115,6 +116,16 @@ export default function App() {
     if (route === 'food') {
       return (
         <FoodWorkspace
+          t={t}
+          appearance={appearance}
+          revision={captureRevision}
+          onSaved={() => setCaptureRevision((value) => value + 1)}
+        />
+      )
+    }
+    if (route === 'cardio') {
+      return (
+        <CardioWorkspace
           t={t}
           appearance={appearance}
           revision={captureRevision}

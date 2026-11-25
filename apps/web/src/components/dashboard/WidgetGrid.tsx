@@ -2,14 +2,19 @@ import { useState, type CSSProperties, type DragEvent } from 'react'
 import type { TranslationKey } from '../../i18n'
 import type { Appearance } from '../../lib/appearance'
 import type {
+  CyclingSessionRecord,
   FoodRecord,
   HabitLogRecord,
   HabitRecord,
+  JumpRopeSessionRecord,
   MealEntryRecord,
   MealPlanRecord,
   NutritionGoalRecord,
   RecipeRecord,
+  StepGoalRecord,
+  StepRecordRecord,
   TaskRecord,
+  WalkingSessionRecord,
   WidgetConfig,
   WorkoutRecord,
 } from '../../lib/db'
@@ -33,6 +38,11 @@ export interface WidgetGridProps {
   mealPlans: MealPlanRecord[]
   nutritionGoals: NutritionGoalRecord[]
   recipes?: RecipeRecord[]
+  walkingSessions: WalkingSessionRecord[]
+  stepRecords: StepRecordRecord[]
+  stepGoals: StepGoalRecord[]
+  jumpRopeSessions: JumpRopeSessionRecord[]
+  cyclingSessions: CyclingSessionRecord[]
   appearance: Appearance
   onToggleTask: (id: string) => void
   onSaved: () => void
@@ -57,6 +67,11 @@ export function WidgetGrid({
   mealPlans,
   nutritionGoals,
   recipes = [],
+  walkingSessions,
+  stepRecords,
+  stepGoals,
+  jumpRopeSessions,
+  cyclingSessions,
   appearance,
   onToggleTask,
   onSaved,
@@ -142,6 +157,11 @@ export function WidgetGrid({
                   mealPlans={mealPlans}
                   nutritionGoals={nutritionGoals}
                   recipes={recipes}
+                  walkingSessions={walkingSessions}
+                  stepRecords={stepRecords}
+                  stepGoals={stepGoals}
+                  jumpRopeSessions={jumpRopeSessions}
+                  cyclingSessions={cyclingSessions}
                   appearance={appearance}
                   onToggleTask={onToggleTask}
                   onSaved={onSaved}

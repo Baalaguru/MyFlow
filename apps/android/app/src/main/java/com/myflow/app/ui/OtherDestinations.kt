@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.myflow.app.R
+import com.myflow.app.data.CardioRepository
 import com.myflow.app.data.DashboardRepository
 import com.myflow.app.data.FoodRepository
 import com.myflow.app.data.GymRepository
@@ -44,10 +45,13 @@ import com.myflow.app.data.WorkoutExerciseWithSets
 import com.myflow.app.data.WidgetIds
 import com.myflow.app.data.aggregateHabitCompletion
 import com.myflow.app.data.calculateHabitStreaks
+import com.myflow.app.data.cyclingSummary
 import com.myflow.app.data.foodSummary
+import com.myflow.app.data.jumpRopeSummary
 import com.myflow.app.data.mascotProgress
 import com.myflow.app.data.progressForTasks
 import com.myflow.app.data.round1
+import com.myflow.app.data.walkingSummary
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 import com.myflow.app.ui.navigation.AppDestinations
@@ -57,6 +61,7 @@ import com.myflow.app.ui.workspaces.ModuleHeader
 import com.myflow.app.ui.workspaces.ModuleStats
 import com.myflow.app.ui.workspaces.ProgressStrip
 import com.myflow.app.ui.workspaces.SectionCard
+import com.myflow.app.ui.workspaces.ValueRow
 
 private fun widgetLabelRes(id: String): Int = when (id) {
     WidgetIds.TODO_OVERVIEW -> R.string.widget_todo
@@ -108,6 +113,7 @@ fun DashboardScreen(
     habits: HabitRepository,
     gym: GymRepository,
     food: FoodRepository,
+    cardio: CardioRepository,
 ) {
     val tasks by repository.observeTasks().collectAsState(initial = emptyList())
     val rows by dashboards.observe().collectAsState(initial = emptyList())
@@ -121,6 +127,11 @@ fun DashboardScreen(
     val foodFoods by food.observeFoods().collectAsState(initial = emptyList())
     val foodGoals by food.observeGoals().collectAsState(initial = emptyList())
     val foodRecipes by food.observeRecipeAggregates().collectAsState(initial = emptyList())
+    val cardioWalks by cardio.observeWalkingSessions().collectAsState(initial = emptyList())
+    val cardioSteps by cardio.observeStepRecords().collectAsState(initial = emptyList())
+    val cardioGoals by cardio.observeStepGoals().collectAsState(initial = emptyList())
+    val cardioJumps by cardio.observeJumpRopeSessions().collectAsState(initial = emptyList())
+    val cardioRides by cardio.observeCyclingSessions().collectAsState(initial = emptyList())
     var gymAggregates by remember { mutableStateOf<List<WorkoutAggregate>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
@@ -144,6 +155,15 @@ fun DashboardScreen(
     val active = rows.firstOrNull { it.id == activeId } ?: rows.firstOrNull()
     val widgets = if (active != null) DashboardRepository.decode(active.widgets) else emptyList()
     val completed = tasks.count { it.completed }
+    val cardioDate = LocalDate.now()
+    val cardioWalking = walkingSummary(
+        cardioWalks,
+        cardioSteps,
+        cardioGoals.firstOrNull { it.localDate == cardioDate.toString() },
+        cardioDate,
+    )
+    val cardioJumpRope = jumpRopeSummary(cardioJumps, cardioDate)
+    val cardioCycling = cyclingSummary(cardioRides, cardioDate)
 
     Column(
         modifier = Modifier
@@ -344,6 +364,125 @@ fun DashboardScreen(
                         else "${summary.workoutCount} · ${summary.totalVolume.toInt()} vol · ${summary.prCount} PRs",
                         style = MaterialTheme.typography.titleMedium,
                     )
+                }
+                if (widget.id == WidgetIds.WALKING_OVERVIEW) {
+                    if (cardioWalking.steps == null && cardioWalking.sessionCount == 0) {
+                        EmptyState(
+                            title = stringResource(R.string.empty_title),
+                            body = stringResource(R.string.cardio_no_walking_sessions),
+                        )
+                    } else {
+                        cardioWalking.steps?.let { steps ->
+                            Text(
+                                text = stringResource(R.string.cardio_daily_steps, steps),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            if (cardioWalking.goalProgress.available) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.cardio_step_goal_progress,
+                                        steps,
+                                        cardioWalking.stepGoal ?: 0,
+                                        cardioWalking.goalProgress.percent ?: 0,
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (cardioWalking.goalProgress.overGoal) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                )
+                            } else {
+                                Text(
+                                    text = stringResource(R.string.cardio_no_step_goal),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        cardioWalking.durationSeconds?.let { seconds ->
+                            Text(
+                                text = stringResource(R.string.cardio_daily_duration, seconds / 60L),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        ValueRow(
+                            label = stringResource(R.string.cardio_field_distance),
+                            value = cardioWalking.distanceMeters?.let { meters ->
+                                stringResource(R.string.cardio_daily_distance, meters / 1000.0)
+                            } ?: stringResource(R.string.cardio_quality_unavailable),
+                        )
+                    }
+                }
+                if (widget.id == WidgetIds.JUMP_ROPE_OVERVIEW) {
+                    if (cardioJumpRope.sessionCount == 0) {
+                        EmptyState(
+                            title = stringResource(R.string.empty_title),
+                            body = stringResource(R.string.cardio_no_jump_rope_sessions),
+                        )
+                    } else {
+                        cardioJumpRope.jumpCount?.let { count ->
+                            Text(
+                                text = stringResource(R.string.cardio_jump_rope_count, count),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                        cardioJumpRope.durationSeconds?.let { seconds ->
+                            Text(
+                                text = stringResource(R.string.cardio_daily_duration, seconds / 60L),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        ValueRow(
+                            label = stringResource(R.string.cardio_field_rounds),
+                            value = cardioJumpRope.rounds?.toString()
+                                ?: stringResource(R.string.cardio_quality_unavailable),
+                        )
+                        ValueRow(
+                            label = stringResource(R.string.cardio_jump_rope_rest, cardioJumpRope.restSeconds?.div(60L) ?: 0L),
+                            value = stringResource(R.string.cardio_manual_fallback),
+                        )
+                    }
+                }
+                if (widget.id == WidgetIds.CYCLING_OVERVIEW) {
+                    if (cardioCycling.sessionCount == 0) {
+                        EmptyState(
+                            title = stringResource(R.string.empty_title),
+                            body = stringResource(R.string.cardio_no_cycling_sessions),
+                        )
+                    } else {
+                        ValueRow(
+                            label = stringResource(R.string.cardio_field_distance),
+                            value = cardioCycling.distanceMeters?.let { meters ->
+                                stringResource(R.string.cardio_combined_distance, meters / 1000.0)
+                            } ?: stringResource(R.string.cardio_quality_unavailable),
+                        )
+                        cardioCycling.movingSeconds?.let { seconds ->
+                            Text(
+                                text = stringResource(R.string.cardio_daily_duration, seconds / 60L),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        cardioCycling.averageSpeedKmh?.let { speed ->
+                            Text(
+                                text = stringResource(R.string.cardio_cycling_avg_speed, speed),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        cardioCycling.maxSpeedKmh?.let { speed ->
+                            Text(
+                                text = stringResource(R.string.cardio_cycling_max_speed, speed),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        if (cardioCycling.distanceMeters == null || cardioCycling.maxSpeedKmh == null) {
+                            Text(
+                                text = stringResource(R.string.cardio_manual_fallback),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
                 if (widget.id == WidgetIds.FOOD_OVERVIEW) {
                     val today = LocalDate.now()

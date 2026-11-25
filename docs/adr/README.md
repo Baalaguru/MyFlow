@@ -27,5 +27,6 @@
 | [0023](0023-gym-workouts-and-sets.md) | Gym workouts, sets, and personal records | Superseded | Per-set rows, completed-only volume, PR/overload rules, real gym widget; muscle-group field superseded by ADR-0024 |
 | [0024](0024-exercise-multi-muscle-groups.md) | Gym exercise multi-muscle groups | Accepted | Canonical `muscleGroups: string[]`; Android stores comma-separated local value with boundary serialization until sync migration |
 | [0025](0025-food-and-nutrition-tracker.md) | Food and nutrition tracker | Accepted | Local-only manual food/recipe records, explicit meal plans, per-date goals, reference-only images, shared nutrition rules and fixtures |
+| [0026](0026-cardio-tracker.md) | Cardio tracker | Accepted | Local-only walking/steps, jump rope, cycling and analytics; deduped steps, MET estimates, filtered GPS, shared cardio fixtures |
 
-All ADRs were accepted on 2026-11-22 as part of the architecture baseline. Superseding one requires a new ADR that marks the old record `Superseded` and links it here.
+ADRs 0001–0025 were accepted on 2026-11-22 as part of the architecture baseline; ADR-0026 was accepted on 2026-11-24. Superseding one requires a new ADR that marks the old record `Superseded` and links it here.

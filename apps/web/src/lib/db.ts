@@ -216,6 +216,77 @@ export interface NutritionGoalRecord {
   updatedAt: string
 }
 
+export type CalorieBasis = 'manual' | 'metWalking' | 'metJumpRope' | 'unavailable'
+
+export interface WalkingSessionRecord {
+  id: string
+  localDate: string
+  startedAt: string
+  endedAt: string
+  stepCount: number
+  durationSeconds: number
+  distanceMeters: number | null
+  calories: number | null
+  bodyWeightKg: number | null
+  calorieBasis: 'manual' | 'metWalking' | 'unavailable'
+  source: 'manual' | 'sensor'
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface StepRecordRecord {
+  id: string
+  localDate: string
+  stepCount: number
+  source: 'manual' | 'sensor' | 'session'
+  sourceEventId: string
+  createdAt: string
+}
+
+export interface StepGoalRecord {
+  id: string
+  localDate: string
+  stepGoal: number
+  updatedAt: string
+}
+
+export interface JumpRopeSessionRecord {
+  id: string
+  localDate: string
+  startedAt: string
+  endedAt: string
+  durationSeconds: number
+  jumpCount: number
+  countSource: 'manual' | 'sensor_assisted'
+  rounds: number
+  restSeconds: number
+  calories: number | null
+  bodyWeightKg: number | null
+  calorieBasis: 'manual' | 'metJumpRope' | 'unavailable'
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CyclingSessionRecord {
+  id: string
+  localDate: string
+  startedAt: string
+  endedAt: string
+  durationSeconds: number
+  movingSeconds: number
+  pauseSeconds: number
+  stationarySeconds: number
+  distanceMeters: number | null
+  averageSpeedKmh: number | null
+  maxSpeedKmh: number | null
+  sourceQuality: 'manual' | 'gps_accepted' | 'gps_filtered' | 'unavailable'
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface WidgetConfig {
   id: WidgetId
   columns: number
@@ -249,6 +320,11 @@ class MyFlowDatabase extends Dexie {
   mealPlans!: Table<MealPlanRecord, string>
   recipes!: Table<RecipeRecord, string>
   nutritionGoals!: Table<NutritionGoalRecord, string>
+  walkingSessions!: Table<WalkingSessionRecord, string>
+  stepRecords!: Table<StepRecordRecord, string>
+  stepGoals!: Table<StepGoalRecord, string>
+  jumpRopeSessions!: Table<JumpRopeSessionRecord, string>
+  cyclingSessions!: Table<CyclingSessionRecord, string>
 
   constructor() {
     super('myflow')
@@ -300,6 +376,27 @@ class MyFlowDatabase extends Dexie {
       mealPlans: 'id, localDate, mealType, foodId, recipeId, [localDate+mealType], plannedAt',
       recipes: 'id, name, favorite, createdAt, updatedAt',
       nutritionGoals: 'id, localDate, updatedAt',
+    })
+    this.version(7).stores({
+      settings: 'key',
+      tasks: 'id, completed, dueDate, priority, category, recurrenceParentId',
+      dashboards: 'id, order, isDefault',
+      habits: 'id, paused, archived, createdAt',
+      habitLogs: 'id, habitId, localDate, [habitId+localDate], status',
+      mascotState: 'id',
+      exercises: 'id, name, muscleGroup, isCustom, createdAt',
+      workouts: 'id, startedAt, endedAt',
+      personalRecords: 'id, exerciseId, metric, achievedAt, [exerciseId+metric]',
+      foods: 'id, name, source, createdAt, updatedAt',
+      mealEntries: 'id, localDate, mealType, foodId, recipeId, [localDate+mealType], loggedAt',
+      mealPlans: 'id, localDate, mealType, foodId, recipeId, [localDate+mealType], plannedAt',
+      recipes: 'id, name, favorite, createdAt, updatedAt',
+      nutritionGoals: 'id, localDate, updatedAt',
+      walkingSessions: 'id, localDate, startedAt, source',
+      stepRecords: 'id, localDate, source, [source+localDate+sourceEventId], createdAt',
+      stepGoals: 'id, localDate, updatedAt',
+      jumpRopeSessions: 'id, localDate, countSource, createdAt',
+      cyclingSessions: 'id, localDate, sourceQuality, startedAt',
     })
   }
 }
